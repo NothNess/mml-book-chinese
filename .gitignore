@@ -1,0 +1,13 @@
+*.aux
+*.fls
+*.out
+*.fdb_latexmk
+*.log
+*.synctex(busy)
+*.toc
+*.xdv
+*.pdf
+*/*.aux
+missfont.log
+main.synctex.gz
+
