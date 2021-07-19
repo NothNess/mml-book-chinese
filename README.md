@@ -13,7 +13,7 @@
 ```shell
 git clone https://github.com/NothNess/mml-book-chinese
 cd mml-book-chinese
-xelatex main.tex
+xelatex mml-book-chinese.tex
 ```
 
 如果没有xelatex命令, 请先安装LaTex:
@@ -22,5 +22,5 @@ xelatex main.tex
 sudo pacman -S texlive-most texlive-langchinese # on Arch/Manjaro, 其他平台自行google
 ```
 
-这时候目录下会出现`main.pdf`文件, 就是最终的pdf了
+这时候目录下会出现`mml-book-chinese.pdf`文件, 就是最终的pdf了
 

@@ -7,7 +7,7 @@
 *.toc
 *.xdv
 *.pdf
+*.synctex.gz
 */*.aux
 missfont.log
-main.synctex.gz
 
