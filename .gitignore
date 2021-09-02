@@ -8,6 +8,9 @@
 *.xdv
 *.pdf
 *.synctex.gz
+*.lof
+*.lot
 */*.aux
+*/__*_temp.tex
 missfont.log
 

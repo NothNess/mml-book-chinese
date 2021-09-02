@@ -4,49 +4,49 @@
 \begin{tabular}{llp{\textwidth}}
     \hline
     Symbol & Typical meaning \\
-    \hline 
+    \hline
     \hline
     $a, b, c, \alpha, \beta, \gamma$ & 标量是小写字母 \\
-    $\boldsymbol{x}, \boldsymbol{y}, \boldsymbol{z}$ & 向量是加粗小写字母 \\
-    $\boldsymbol{A}, \boldsymbol{B}, \boldsymbol{C}$ & 矩阵是加粗大写字母 \\
-    $\boldsymbol{x}^\top, \boldsymbol{A}^\top$  & 向量或矩阵的转置 \\
-    $\boldsymbol{A}^-1$ & 逆矩阵 \\
-    $\langle \boldsymbol{x}, \boldsymbol{y} \rangle$ & $\boldsymbol{x}$ 和$\boldsymbol{y}$ 的内积 \\
-    $\boldsymbol{x} \cdot \boldsymbol{y}$ & $\boldsymbol{x}$ 和$\boldsymbol{y}$ 的点积 \\
-    $B=(\boldsymbol{b}_1, \boldsymbol{b}_2, \boldsymbol{b}_3)$ & (有序) 元组 \\
-    $\boldsymbol{B}=[\boldsymbol{b}_1, \boldsymbol{b}_2, \boldsymbol{b}_3]$ & 列向量水平堆叠构成矩阵 \\
-    $\mathcal{B} ={\boldsymbol{b}_1, \boldsymbol{b}_2, \boldsymbol{b}_3}$ & 向量的集合(无序) \\
-    $\mathbb{Z}, \mathbb{N}$ & 整数和自然数 \\
-    $\mathbb{R}, \mathbb{C}$ & 实数和负数 \\
-    $\mathbb{R}^n$ & 实数域n维向量空间(vector space) \\
+    $\x, \y, \bs{z}$ & 向量是加粗小写字母 \\
+    $\A, \B, \bs{C}$ & 矩阵是加粗大写字母 \\
+    $\x^\top, \A^\top$  & 向量或矩阵的转置 \\
+    $\A^{-1}$ & 逆矩阵 \\
+    $\langle \x, \y \rangle$ & $\x$ 和$\y$ 的内积 \\
+    $\x \cdot \y$ & $\x$ 和$\y$ 的点积 \\
+    $B=(\b_1, \b_2, \b_3)$ & (有序) 元组 \\
+    $\B=[\b_1, \b_2, \b_3]$ & 列向量水平堆叠构成矩阵 \\
+    $\mc{B} = \{\b_1, \b_2, \b_3 \}$ & 向量的集合(无序) \\
+    $\mb{Z}, \mb{N}$ & 整数和自然数 \\
+    $\R, \mb{C}$ & 实数和负数 \\
+    $\R^n$ & 实数域n维向量空间(vector space) \\
     \hline
     $\forall x$ & 全称量词:对于所有$x$ \\
     $\exists x$ & 存在量词: 至少存在一个$x$ \\
     $a:=b$ & a 被定义为b \\
     $a=:b$ & b 被定义为a \\
-    $a \propto b$ & a 与 b成 正比例 \\
-    $g \circ f$ & 函数复合:"g 后是 f" \\
+    $a \propto b$ & a 与 b成 正比例,i.e.,$a = constant \cdot b$\\
+    $g \circ f$ & 函数复合:"f 后是 g" \\
     $\Longleftrightarrow$ & 当且仅当 \\
     $\Longrightarrow$ & 蕴涵 \\
-    $\mathcal{A}, \mathcal{C}$ & 集合 \\
-    $a \in \mathcal{A}$ & $a$ 是集合$\mathcal{A}$的一个元素 \\
+    $\mc{A}, \mc{C}$ & 集合 \\
+    $a \in \mc{A}$ & $a$ 是集合$\mc{A}$的一个元素 \\
     $\emptyset$ & 空集 \\
-    $\mathcal{A} \backslash \mathcal{B}$ & 排除$\mathcal{B}$的$\mathcal{A}$: 
-            所有在$\mathcal{A}$ 但是不在 $\mathcal{B}$中的元素的集合 \\
+    $\mc{A} \backslash \mc{B}$ & 排除$\mc{B}$的$\mc{A}$:
+            所有在$\mc{A}$ 但是不在 $\mc{B}$中的元素的集合 \\
     $D$ & 维数, $d = 1, ... D$ \\
     $N$ & 数据点(data points)的个数, $n = 1,..., N$ \\
     \hline
-    $\boldsymbol{I}_m$ & 大小为$m \times m$的矩阵 \\
-    $\boldsymbol{0}_{m,n}$ & 大小为$m \times n$的0矩阵 \\
-    $\boldsymbol{1}_{m,n}$ & 大小为$m \times n$的1矩阵 \\
-    $\boldsymbol{e}_i$ & 标准/规范向量 \\
+    $\bs{I}_m$ & 大小为$m \times m$的矩阵 \\
+    $\bs{0}_{m,n}$ & 大小为$m \times n$的0矩阵 \\
+    $\bs{1}_{m,n}$ & 大小为$m \times n$的1矩阵 \\
+    $\e_i$ & 标准/规范向量 \\
     $\dim$ & 向量空间的维 \\
-    $\mathrm{rk}(\boldsymbol{A})$ & 矩阵$\boldsymbol{A}$的秩(rank) \\
-    $\mathrm{Im}(\Phi)$ & 线性映射$\Phi$的像(image) \\
-    $\ker(\Phi)$ & 线性映射$\Phi$ kernel(null space, 零空间) \\
-    $\mathrm{span}[\boldsymbol{b}_1]$ & $\boldsymbol{b}_1$ 的 张成空间(Span, gererating set) \\
-    $\mathrm{tr}(\boldsymbol{A})$ & $\boldsymbol{A}$的迹(trace) \\
-    $\det(\boldsymbol{A})$ & $\boldsymbol{A}$的行列式(determinant) \\
+    $\rk(\A)$ & 矩阵$\A$的秩(rank) \\
+    $\Im(\Phi)$ & 线性映射$\Phi$的像(image) \\
+    $\ker(\Phi)$ & 线性映射$\Phi$ 核(null space, 零空间) \\
+    $\spn[\b_1]$ & $\b_1$ 的 张成空间(Span, gererating set) \\
+    $\mathrm{tr}(\A)$ & $\A$的迹(trace) \\
+    $\det(\A)$ & $\A$的行列式(determinant) \\
     $|\cdot|$ & 行列式的绝对值(取决于上下文) \\
     $\| \cdot \|$ & 范数(norm);未特别指出则均指代欧几里德范数 \\
     $\lambda$ & 特征值(eigenvalue)/拉格朗日乘数(Lagrange multiplier) \\
@@ -61,25 +61,25 @@
 	Symbol & Typical meaning \\
 	\hline
 	\hline
-	$ \boldsymbol{x} \perp \boldsymbol{y} $ & 向量$\boldsymbol{x}$和向量$\boldsymbol{y}$正交 \\
+	$ \x \perp \y $ & 向量$\x$和向量$\y$正交 \\
 	$V$ & 向量空间 \\
 	$V^\top$ & 向量空间$V$的正交补(orthogonal complement) \\
 	$\sum_{n=1}^{N}x_n$ & Sum of the $x_n: x_1 + ... + x_N$ \\
 	$\prod_{n=1}^{N}x_n$ & Product of the $x_n: x_1 \cdot ... \cdot x_N$ \\
-	$\boldsymbol{\theta}$ & 参数向量 \\
+	$\bs{\theta}$ & 参数向量 \\
 	$ \frac{\partial f}{\partial x} $ & $f$关于$x$的偏导数 \\
 	$ \frac{\mathrm{d} f}{\mathrm{d} x} $ & $f$关于$x$的导数 \\
 	$ \nabla $ & 梯度{gradient} \\
 	$ f_* = \min_x f(x) $ & 函数$f$的最小函数值 \\
-	$ x_* \in \arg \min_x f(x) $ & $x_*$使$f$最小化(注意:$\arg \min$返回一组值) \\ 
+	$ x_* \in \arg \min_x f(x) $ & $x_*$使$f$最小化(注意:$\arg \min$返回一组值) \\
 	$ \mathfrak{L}$ & 拉格朗日(Lagrangian) \\
-	$ \mathcal{L}$ & 负对数似然(negative log-likelihood) \\
+	$ \mc{L}$ & 负对数似然(negative log-likelihood) \\
 	$\binom{n}{k}$ & 二项式系数, n个选k个\\
-	$\mathbb{V}_X[\boldsymbol{x}]$ & $\boldsymbol{x}$相对于随机变量$X$ 的方差 \\
-	$\mathbb{E}_X[\boldsymbol{x}]$ & $\boldsymbol{x}$相对于随机变量$X$ 的期望 \\
-	$\mathrm{Cov}_{x,y}[\boldsymbol{x}, \boldsymbol{y}]$ & $x,y$的协方差 \\
+	$\mb{V}_X[\x]$ & $\x$相对于随机变量$X$ 的方差 \\
+	$\mb{E}_X[\x]$ & $\x$相对于随机变量$X$ 的期望 \\
+	$\mathrm{Cov}_{x,y}[\x, \y]$ & $x,y$的协方差 \\
 	$X \perp \!\!\! \perp Y | Z$ & 给定$Z$, $X$条件独立于$Y$ \\
-	$\mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ & 随机变量 $X$ 依据 $p$ 分布 \\
+	$\mc{N}(\bs{\mu}, \bs{\Sigma})$ & 随机变量 $X$ 依据 $p$ 分布 \\
 	$\mathrm{Ber}(\mu)$ & 参数为$\mu$的伯努利分布(Bernoulli distribution) \\
 	$\mathrm{Bin}(N, \mu)$ & 参数为$N, \mu$的二项分布(Binomial distribution) \\
 	$\mathrm{Beta}(\alpha, \beta)$ & 参数为$N, \mu$的Beta分布 \\
@@ -96,7 +96,7 @@
 	\hline
 	e.g. & 例如 \\
 	GMM & 高斯混合模型(Gaussian mixture model) \\
-	i.e & 这意味着,意思是..(this means)\\
+	i.e & 这意味着,意思是。.(this means)\\
 	i.i.d & 独立, 等同分布(independent, identically distributed) \\
 	MAP & 最大后验(maximum a posteriori) \\
 	MLE & 最大似然估计(maximum likelihood estimation/estimator) \\

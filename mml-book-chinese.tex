@@ -7,6 +7,50 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{tikz}
+\usepackage{subfigure}
+\usepackage{pgfplots}
+
+\newtheorem{example}{例}[chapter]
+\newtheorem{definition}{定义}[chapter]
+\newtheorem{theorem}[definition]{定理}
+\newtheorem{remark}{注解}
+\newtheorem{proof}{证明}
+\newtheorem{algorithm}{算法}
+\newtheorem{axiom}{公理}
+\newtheorem{property}{性质}
+\newtheorem{proposition}{命题}
+\newtheorem{lemma}{引理}
+\newtheorem{corollary}{推论}
+\newtheorem{condition}{条件}
+\newtheorem{conclusion}{结论}
+\newtheorem{assumption}{假设}
+
+% 常用命令的简写
+\newcommand{\mb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\spn}{\mathrm{span}}
+\newcommand{\rk}{\mathrm{rk}}
+\newcommand{\id}{\mathrm{id}}
+\renewcommand{\Im}{\mathrm{Im}}
+
+% 常用符号的简写
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\A}{\bs{A}}
+\newcommand{\B}{\bs{B}}
+\newcommand{\T}{\bs{T}}
+\newcommand{\I}{\bs{I}}
+\renewcommand{\S}{\bs{S}}
+\newcommand{\x}{\bs{x}}
+\newcommand{\y}{\bs{y}}
+\newcommand{\e}{\bs{e}}
+\renewcommand{\a}{\bs{a}}
+\renewcommand{\b}{\bs{b}}
+\renewcommand{\c}{\bs{c}}
+\renewcommand{\u}{\bs{u}}
+\renewcommand{\v}{\bs{v}}
+\newcommand{\w}{\bs{w}}
+\newcommand{\0}{\bs{0}}
 
 \begin{document}
 
@@ -24,10 +68,12 @@
 
 \part{数学基础}
 \include{./chapter01/chapter01.tex}
+\include{./chapter02/chapter02.tex}
 
 \part{重要的机器学习问题}
 
 \backmatter
 \appendix
+\listoffigures
 
 \end{document}
