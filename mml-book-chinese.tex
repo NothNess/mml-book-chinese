@@ -30,9 +30,12 @@
 \newcommand{\mc}[1]{\mathcal{#1}}
 \newcommand{\bs}[1]{\boldsymbol{#1}}
 \newcommand{\spn}{\mathrm{span}}
+% \newcommand{\spn}[1]{\mathrm{span}\left\lbrack #1 \right\rbrack}
 \newcommand{\rk}{\mathrm{rk}}
 \newcommand{\id}{\mathrm{id}}
 \renewcommand{\Im}{\mathrm{Im}}
+\newcommand{\innerproduct}[2]{\left\langle#1,#2\right\rangle}
+\newcommand{\norm}[1]{\left\|#1\right\|}
 
 % 常用符号的简写
 \newcommand{\R}{\mathbb{R}}
@@ -43,6 +46,7 @@
 \renewcommand{\S}{\bs{S}}
 \newcommand{\x}{\bs{x}}
 \newcommand{\y}{\bs{y}}
+\newcommand{\z}{\bs{z}}
 \newcommand{\e}{\bs{e}}
 \renewcommand{\a}{\bs{a}}
 \renewcommand{\b}{\bs{b}}
@@ -69,6 +73,8 @@
 \part{数学基础}
 \include{./chapter01/chapter01.tex}
 \include{./chapter02/chapter02.tex}
+\include{./chapter03/chapter03.tex}
+\include{./chapter04/chapter04.tex}
 
 \part{重要的机器学习问题}
 
