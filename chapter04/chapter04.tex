@@ -1,1 +1,1949 @@
 \chapter{矩阵分解}
+在第 2 章和第 3 章中，我们研究了操纵和测量向量、向量的投影和线性映射的方法。
+向量的映射和变换可以方便地描述为由矩阵执行的运算。
+此外，数据通常也以矩阵形式表示，例如，矩阵的行代表不同的人，列描述人的不同特征，例如体重、身高和社会经济地位。
+在本章中，我们介绍矩阵的三个方面：
+如何总结(summarize)矩阵、
+如何分解(decomposed)矩阵
+以及如何将这些分解用于矩阵近似(matrix approximations)。
+
+我们首先考虑允许我们只用几个表征矩阵整体属性的数字来描述矩阵的方法。
+对于重要的特殊情况:方阵，
+我们将在关于行列式(diterminants)（第 4.1 节）
+和特征值(eigenvalues)（第 4.2 节）的部分中进行此操作。
+这些特征数具有重要的数学意义，使我们能够快速掌握矩阵具有哪些有用的属性。
+从这里我们将继续了解矩阵分解方法：
+矩阵分解的一个类比是数字的因式分解，例如将21分解为质数$7 \cdot 3$。
+因此，矩阵分解(matrix decomposition)通常也称为矩阵因式分解(matrix factorization)。
+矩阵分解用于通过使用可解释矩阵(interpretable matrics)的因子(factors)的不同表示来描述矩阵。
+
+我们将首先介绍对称正定矩阵的类平方根(square-root-like)运算，
+即 Cholesky 分解（第 4.3 节）。
+从这里我们将看看将矩阵分解为规范形式(canonical forms)的两种相关方法。
+第一个称为矩阵对角化(matrix diagonalization)（第 4.4 节），
+如果我们选择合适的基，它允许我们使用对角变换矩阵(diagonal transformation matrix)来表示线性映射。
+第二种方法，奇异值分解(singular value decomposition)（第 4.5 节），
+将这种分解扩展到非方阵，它被认为是线性代数中的基本概念之一。
+这些分解很有帮助，因为表示数值数据的矩阵通常非常大且难以分析。
+我们以系统地概述了矩阵的类型和以矩阵分类法(matrix taxonomy)的形式（第 4.7 节）区分它们的特征属性来结束本章。
+
+我们在本章中介绍的方法将在后续的数学基础章节（例如第 6 章）
+以及应用章节（例如第 10 章的降维或第 11 章的密度估计）中变得重要。
+本章的总体结构描绘在 图 4.1 的思维导图中。
+
+\begin{figure}
+\begin{tikzpicture}
+\end{tikzpicture}
+\caption{本章概念的思维导图, 以及他们在本书其他部分的使用}
+\end{figure}
+
+\section{行列式和迹}
+行列式是线性代数中的重要概念。
+行列式是分析和求解线性方程组的数学对象。
+行列式仅针对方阵$\A \in \R^{n \times n}$定义，即具有相同行数和列数的矩阵。
+在本书中，我们将行列式写为$\det(\A)$或有时写为$|\A|$, 所以
+\begin{equation}
+    \det(\A) =
+    \begin{array}{|cccc|}
+        a_{11} & a_{12} & \dots & a_{1n} \\
+        a_{21} & a_{22} & \dots & a_{2n} \\
+        \vdots &        & \ddots & \vdots \\
+        a_{n1} & a_{n2} & \dots & a_{nn} \\
+    \end{array}.
+\end{equation}
+方阵$\A \in \R^{n \times n}$的行列式是将$\A$映射到实数的函数。
+在给出一般$n \times n$矩阵的行列式定义之前，
+让我们先看一些激动人心的示例，并定义一些特殊矩阵的行列式。
+\begin{example}[测试矩阵可逆性]
+    让我们开始探索方阵$\A$是否可逆（参见第 2.2.2 节）。
+    对于最小的情况，我们已经知道矩阵何时可逆。
+    如果$\A$是一个$1 \times 1$矩阵, i.e.,
+    它是一个标量，那么$\A = \a \Rightarrow \A^{−1} = \frac{1}{a}$.
+    所以$a \frac{1}{a} = 1$成立, 当且仅当$a \neq 0$.
+
+    对于$2 \times 2$矩阵，根据逆的定义（定义 2.3），我们知道$\A\A^{−1} = \I$。
+    然后，根据 (2.24)，$\A$的逆是
+    \begin{equation}
+        \A^{-1} =
+        \frac{1}{a_{11}a_{22} - a_{12}a_{21}}
+        \begin{bmatrix}
+            a_{22} & -a_{12} \\
+            -a_{21} & a_{11}
+        \end{bmatrix}.
+    \end{equation}
+    因此,$\A$是可逆的, 当且仅当
+    \begin{equation}
+        a_{11}a_{22} - a_{12}a_{21} \neq 0.
+    \end{equation}
+    这个式子(quantity)是$\A \in \R^{2 \times 2}$的行列式，即
+    \begin{equation}
+        \det(\A) =
+        \begin{array}{|cc|}
+            a_{11} & a_{12} \\
+            a_{21} & a_{22}
+        \end{array} =
+        a_{11}a_{12} - a_{12}a_{21}.
+    \end{equation}
+\end{example}
+
+例 4.1 已经指出了行列式和逆矩阵的存在之间的关系。
+下一个定理说明了对于$n \times n$矩阵有相同结果。
+
+\begin{theorem}
+    对于任何方阵$\A \in \R^{n \times n}$，
+    $\A$可逆当且仅当$\det(\A) \neq 0$。
+\end{theorem}
+根据矩阵的元素，我们有小矩阵行列式的显式（封闭形式）表达式。对于$n = 1$，
+\begin{equation}
+    \det(\A) = \det(a_{11}) = a_{11}.
+\end{equation}
+对于$n = 2$,
+\begin{equation}
+    \det(\A) =
+    \begin{array}{|cc|}
+        a_{11} & a_{12} \\
+        a_{21} & a_{22}
+    \end{array} =
+    a_{11} a_{22} − a_{12} a_{21},
+\end{equation}
+这在我们在前面的例子中已经见过了.
+对于$n = 3$
+(Sarrus法则\footnotemark)
+\footnotetext{
+    Sarrus'rule,
+    维基百科称之为
+    \href{https://zh.wikipedia.org/wiki/萨吕法则}{萨吕法则}
+}
+\begin{equation}
+    \begin{array}{|ccc|}
+        a_{11} & a_{12} & a_{13} \\
+        a_{21} & a_{22} & a_{23} \\
+        a_{31} & a_{32} & a_{33}
+    \end{array} =
+    a_{11} a_{22} a_{33} + a_{21} a_{32} a_{13} + a_{31} a_{12} a_{23}
+    - a_{31} a_{22} a_{13} − a_{11} a_{32} a_{23} − a_{21} a_{12} a_{33} .
+\end{equation}
+为了帮助记忆 Sarrus 规则中的乘积项，请尝试跟踪矩阵中三重乘积(triple products)的元素。
+
+如果$i > j$时$\T_{ij} = 0$，
+即矩阵在其对角线以下为零，我们将方阵$\T$称为上三角矩阵。
+类似地，我们将下三角矩阵定义为对角线上方为零的矩阵。
+对于三角矩阵$\T \in \R^{n \times n}$，行列式是对角元素的乘积，即，
+\begin{equation}
+    \det(\T) = \prod_{i=1}^{n} T_{ii}.
+\end{equation}
+
+\begin{example}[作为体积量度的行列式]
+当我们将行列式视为从一组$n$个张成$\R^n$中对象的向量的映射时，行列式的概念是很自然的。
+事实证明，行列式$\det(\A)$是由矩阵$\A$的列形成的
+$n$维平行六面体(parallelepiped)的有符号体积(signed volumn)。
+对于$n = 2$，矩阵的列形成平行四边形； 见图 4.2。
+随着向量之间的角度变小，平行四边形的面积也会缩小。
+考虑形成矩阵$\A = [\b, \bs{g}]$的列的两个向量$\b, \bs{g}$。
+那么，$\A$的行列式的绝对值是
+顶点(vertices)为$\0, \b, \bs{g}, \b + \bs{g}$的平行四边形(parallelogram)的面积。
+特别是，如果$\b, \bs{g}$是线性相关的，
+以至于对于某些$\lambda \in \R，\b = \lambda\bs{g}$，
+它们就不再形成二维平行四边形。
+所以对应的面积为0。
+于此相反, 如果$\b,\bs{g}$是线性无关且是规范基向量$\e_1,\e_2$的倍数,
+那么他们能被写作$\b = \begin{bmatrix} b \\ 0 \end{bmatrix}$,
+和$\g = \begin{bmatrix} 0 \\ g \end{bmatrix}$,
+且行列式为
+$\begin{array}{|cc|}
+    b & 0 \\
+    0 & g
+\end{array}
+= bg - 0 = bg.$
+
+行列式的符号表示张成向量$\b,\bs{g}$相对于标准基$(\e_1、\e_2)$的方向。
+在我们的图中，交换$\A$的列,翻转顺序为$\bs{g}, \b$,就反转阴影区域的方向。
+这变成了熟悉的公式：面积 = 高度(高) × 长度(宽)。
+这种直觉延伸到更高的维度。
+在$\R^3$中，
+我们考虑三个向量$\bs{r}, \b, \bs{g} \in \R^3$张成平行六面体的边缘，
+即具有平行的平行四边形面的立体图形（见图 4.3）。
+$3 \times 3$矩阵$[\bs{r}, \b, \bs{g}]$的行列式的绝对值是立体图形的体积。
+因此，行列式充当测量带符号体积的函数, 体积由矩阵中列向量组合形成。
+
+考虑三个线性无关的向量$\bs{r}, \bs{g}, \b \in \R^3$给定为
+\begin{equation}
+    \bs{r} = \begin{bmatrix} 2 \\ 0 \\ -8 \end{bmatrix},\quad
+    \bs{g} = \begin{bmatrix} 6 \\ 1 \\ 0 \end{bmatrix},\quad
+    \bs{b} = \begin{bmatrix} 1 \\ 4 \\ -1 \end{bmatrix}
+\end{equation}
+将这些向量写成矩阵的列
+\begin{equation}
+    \A = [\bs{r},\bs{g},\b] =
+    \begin{bmatrix}
+        2 & 6 & 1 \\
+        0 & 1 & 4 \\
+        -8 & 0 & -1
+    \end{bmatrix}
+\end{equation}
+允许我们计算所需的体积为
+\begin{equation}
+    V = |\det(\A)| = 186.
+\end{equation}
+\end{example}
+
+计算$n \times n$矩阵的行列式需要一个通用算法来解决$n > 3$的情况，
+我们将在下面进行探讨。
+下面的定理 4.2 将计算$n \times n$矩阵的行列式的问题
+简化为计算$(n-1) \times (n-1)$矩阵的行列式。
+通过递归应用拉普拉斯展开式(Laplace Expansion)（定理 4.2），
+我们可以通过最终计算$2 \times 2$矩阵的行列式来计算$n \times n$矩阵的行列式。
+
+\begin{theorem}[拉普拉斯展开]
+    考虑矩阵$\A \in \R^{n \times n}$.
+    那么, 对于所有$j = 1,\dots,n$:
+    \begin{enumerate}
+        \item 沿第$j$列展开
+        \begin{equation}
+            \det(\A) = \sum_{k=1}^n (−1)^{k+j} a_{kj} \det(\A_{k,j} ) .
+        \end{equation}
+        \item 沿第$j$行展开
+        \begin{equation}
+            \det(\A) = \sum_{k=1}^n (−1)^{k+j} a_{jk} \det(\A_{j,k} ) .
+        \end{equation}
+    \end{enumerate}
+    这里$\A_{k,j} \in \R^{(n−1) \times (n−1)}$是我们在删除行$k$和列$j$时获得的$\A$的子矩阵。
+\end{theorem}
+
+\begin{example}[拉普拉斯展开]
+   让我们计算下面这个行列式
+   \begin{equation}
+       \begin{array}{|ccc|}
+           1 & 2 & 3 \\
+           3 & 1 & 2 \\
+           0 & 0 & 1
+       \end{array}
+   \end{equation}
+   沿第一行使用拉普拉斯展开式。 应用 (4.13)得到
+   \begin{multline}
+        \begin{array}{|ccc|}
+           1 & 2 & 3 \\
+           3 & 1 & 2 \\
+           0 & 0 & 1
+       \end{array}
+       = (-1)^{1+1} \cdot 1
+       \begin{array}{|cc|}
+           1 & 2 \\
+           0 & 1
+       \end{array} \\
+       + (-1)^{1+2} \cdot 2
+       \begin{array}{|cc|}
+           3 & 2 \\
+           0 & 1
+       \end{array}
+       + (-1)^{1+3} \cdot 3
+       \begin{array}{|cc|}
+            3 & 1 \\
+            0 & 0
+       \end{array}
+   \end{multline}
+   我们使用 (4.6) 来计算所有 2 × 2 矩阵的行列式并获得
+   \begin{equation}
+       \det(\A) = 1(1-0) - 2(3-0) + 3(0-0) = -5.
+   \end{equation}
+   为了完整起见，我们可以将此结果与使用 Sarrus 规则（4.7）计算行列式进行比较：
+   \begin{equation}
+        \det(\A) = 1·1·1+3·0·3+0·2·2−0·1·3−1·0·2−3·2·1 = 1−6 = −5
+   \end{equation}
+\end{example}
+
+对于$\A \in \R^{n \times n}$，行列式表现出以下性质：
+\begin{itemize}
+\item 矩阵乘积的行列式是相应行列式的乘积，$\det(\A\B) = \det(\A)\det(\B)$。
+\item 行列式转置后结果不变，即$\det(\A) = \det(\A^\top)$。
+\item 如果$\A$是正规的(regular)（可逆的），则$\det(\A^{−1}) = \frac{1}{\det(\A)}$.
+\item 相似矩阵（定义 2.22）具有相同的行列式。
+      因此，对于线性映射$\Phi : V \rightarrow V$，
+      $\Phi$的所有变换矩阵$\A_\Phi$具有相同的行列式。
+      因此，行列式不会随着线性映射的基的选择而改变。
+\item 将列/行的倍数添加到另一个列/行不会改变$\det(\A)$。
+\item 列/行与$\lambda \in \R$的乘法将$\det(\A)$乘以$\lambda$。
+      特别地，$\det(\lambda\A) = \lambda^n \det(\A)$。
+\item 交换两行/列会改变$\det(\A)$的符号。
+\end{itemize}
+
+由于最后三个属性，我们可以使用高斯消元法（参见第 2.1 节）
+通过将$\A$变为REF来计算$\det(\A)$。
+当我们有一个三角形形式的$\A$时，我们可以停止高斯消元，其中对角线以下的元素都是 0。
+回忆一下（4.8）三角矩阵的行列式是对角线元素的乘积
+
+\begin{theorem}
+    方阵$\A \in \R^{n \times n}$有$\det(\A) \neq 0$当且仅当$\rk(\A) = n$。
+    换句话说，$\A$是可逆的当且仅当它是满秩的。
+\end{theorem}
+
+当数学主要靠手进行时，行列式计算被认为是分析矩阵可逆性的基本方法。
+然而，机器学习中的当代方法使用直接的数值方法取代了行列式的显式计算。
+例如，在第 2 章中，我们了解到可以通过高斯消元法计算逆矩阵。
+因此，高斯消元可用于计算矩阵的行列式。
+
+行列式将在接下来的章节中发挥重要的理论作用，
+尤其是当我们通过特征多项式(characteristic polynominal)
+学习特征值和特征向量（第 4.2 节）时。
+
+\begin{definition}
+    方阵$\A \in \R^{n \times n}$的迹(trace)定义为
+    \begin{equation}
+        \tr{\A} := \sum_{i=1}^n a_{ii},
+    \end{equation}
+    i.e., 迹是$\A$对角线上元素的和.
+\end{definition}
+
+迹满足一下性质:
+\begin{itemize}
+    \item $\tr{\A+\B} = \tr{\A} + \tr{\B}$, 其中$\A,\B \in \R^{n \times n}$
+    \item $\tr{\alpha\A} = \alpha\tr{\A}$, 其中$\alpha \in \R, \A \in \R^{n \times n}$
+    \item $\tr{\I_n} = n$
+    \item $\tr{\A\B} = \tr{\B\A}$, 其中$\A \in \R^{n \times k},\B \in \R^{k \times n}$
+\end{itemize}
+可以证明只有一个函数同时满足这四个属性——迹（Gohberg 等，2012）。
+矩阵乘积的迹的性质更一般。
+具体来说，迹在循环排列(cyclic permutations)下是不变的，即
+对于矩阵$\A \in \R^{a×k} , \bs{K} \in \R^{k×l} , \bs{L} \in \R^{l×a}$
+\begin{equation}
+    \tr{\A\bs{K}\bs{L}} = \tr{\bs{K}\bs{L}\A}
+\end{equation}
+此属性推广到任意数量矩阵的乘积。
+作为（4.19）的特例，对于两个向量$\x，\y \in \R^n$
+\begin{equation}
+    \tr{\x\y^\top} = \tr{\y^\top\x} = \y^\top\x \in \R.
+\end{equation}
+
+给定线性映射$\Phi : V \rightarrow V$，
+其中$V$是向量空间，我们通过使用$\Phi$的矩阵表示的迹来定义该映射的迹。
+对于给定的$V$的基，我们可以通过变换矩阵$\A$来描述$\Phi$，
+那么$\Phi$的迹就是$\A$的迹。
+对于$V$的不同的基,$\Phi$的相应变换矩阵$\B$可以通过
+选取合适的$\S$对$\S^{-1}\A\S$进行基变换来获得（参见第 2.7.2 节）。
+对于$\Phi$的相应迹，这意味着
+\begin{equation}
+    \tr{\B} = \tr{\bs{S}^{-1}\A\bs{S}}
+    \overset{(4,19)}{=}
+    \tr{\A\S\S^{-1}} = \tr{\A}
+\end{equation}
+因此，虽然线性映射的矩阵表示依赖于基，但\textbf{线性映射$\Phi$的迹与基无关}。
+
+在本节中，我们将行列式和迹作为表征方阵的函数进行了介绍。
+结合我们对行列式和迹的理解，
+我们现在可以定义一个用多项式描述矩阵$\A$的重要方程，
+我们将在下面几节中广泛使用。
+\begin{definition}[特征多项式]
+    对于$\lambda \in \R$和方阵$\A \in \R^{n \times n}$
+    \begin{subequations}
+        \begin{align}
+            p_{\A}(\lambda) &:= \det(\A - \lambda\I) \\
+           & = c_0 + c_1\lambda + c_2\lambda^2 +
+            \cdots + c_{n-1} \lambda^{n-1} + (-1)^n\lambda^n,
+        \end{align}
+    \end{subequations}
+    $c_0,\dots,c_{n-1} \in \R$,
+    是$\A$的特征多项式.特别的,
+    \begin{align}
+        c_0 &= \det(\A),\\
+        c_{n-1} &= (-1)^{n-1}\tr{\A}.
+    \end{align}
+\end{definition}
+特征多项式 (4.22a) 将允许我们计算特征值和特征向量，将在下一节中介绍。
+
+\section{特征值和特征向量}
+我们现在将了解一种表征矩阵及其相关线性映射的新方法。
+回忆 2.7.1 节，每个线性映射都有一个给定有序基的唯一变换矩阵。
+我们可以通过执行“特征(eigen)”分析来解释线性映射及其相关的变换矩阵。
+正如我们将看到的，
+线性映射的特征值将告诉我们一组特殊的向量--特征向量是如何被线性映射转换的。
+
+\begin{definition}
+    设$\A \in R^{n×n}$为方阵。
+    那么$\lambda \in \R$是$\A$的特征值，
+    $\x \in \R^n\backslash\{\0\}$是$\A$的对应特征向量，如果
+    \begin{equation}
+        \A\x = \lambda\x.
+    \end{equation}
+    我们把 (4.25) 称为特征值方程(eigenvalue equation).
+\end{definition}
+\begin{remark}
+    在线性代数文献和软件中，通常习惯于将特征值按降序排列，
+    这样最大的特征值和关联的特征向量称为第一特征值及其关联的特征向量，
+    第二大的称为第二特征值及其关联的特征向量等等。
+    但是，教科书和出版物可能有不同的排序概念或没有排序概念。
+    如果没有明确说明，我们不想在本书中假设一个排序。
+    \hfill $\lozenge$
+\end{remark}
+
+下面的陈述是等价的:
+\begin{itemize}
+    \item $\lambda$是$A \in \R^{n\times n}$的特征值
+    \item 存在$\x \in \R^n\backslash\{\0\}$,使得$\A\x = \lambda\x$,
+          或者等价的,$(\A - \lambda\I_n)\x = \0$有非平凡解,
+          即, $\x \neq \0$.
+    \item $\rk(\A - \lambda\I_n) < n$.
+    \item $\det(\A - \lambda\I_n) = 0$.
+\end{itemize}
+
+\begin{definition}[共线和共向]
+    指向同一方向的两个向量称为共向的(codirected)。
+    如果两个向量指向相同或相反的方向，则它们共线(collinear)。
+\end{definition}
+\begin{remark}[特征向量的非唯一性]
+    如果$\x$是与特征值$\lambda$相关联的$\A$的特征向量，
+    那么对于任何$c \in \R\backslash\{0\}$，
+    $c\x$是具有相同特征值的$\A$的特征向量，因为
+    \begin{equation}
+        \A(c\x) = c\A\x = c\lambda\x = \lambda(c\x).
+    \end{equation}
+    因此, 所有与$\x$共线的向量也是$\A$特征向量.
+    \hfill $\lozenge$
+\end{remark}
+
+\begin{theorem}
+    $\lambda \in \R$是$\A \in \R^{n \times n}$的一个特征值
+    当且仅当$\lambda$是$\A$的特征多项式$p_{\A}(\lambda)$的根(root)
+    \footnote{
+        "根" （或 "零点"）是多项式等于零的地方,也就是多项式的函数图像与x轴的交点的横坐标;
+        (都是初中知识, 可以顺便回忆一下韦达定理:韦达定理是一个公式,给出多项式方程的根与系数的关系)
+    }
+\end{theorem}
+
+\begin{definition}
+    设一个方阵$\A$有一个特征值$\lambda_i$。
+    $\lambda_i$的代数重数(algebraic multiplicity)
+    是根在特征多项式中出现的次数。
+\end{definition}
+\begin{definition}[特征空间和特征谱]
+    对于$\A \in \R^{n×n}$，
+    与特征值$\lambda$相关联的$\A$的所有特征向量的集合
+    张成$\R^n$的一个子空间，称为$\A$相对于$\lambda$的特征空间，
+    用$E_\lambda$表示。
+    $\A$的所有特征值的集合称为$\A$的特征谱(eigenspectrum)，或简称谱(spectrum)。
+\end{definition}
+
+如果$\lambda$是$\A \in \R^{n×n}$的特征值，
+则对应的特征空间$E_\lambda$是齐次线性方程组$(\A−\lambda\I)\x = \0$的解空间。
+几何上，非零特征值对应的特征向量指向线性映射拉伸的方向。
+特征值是它被拉伸的因子。
+如果特征值为负，则拉伸方向翻转。
+
+\begin{example}[单位矩阵的情况]
+    单位矩阵$\I \in \R^{n×n}$具有特征多项式
+    $p_{\I}(\lambda) = \det(\I − \lambda\I) = (1 − \lambda)^n = 0$，
+    其中只有一个特征值$\lambda = 1$ 出现了$n$次。
+    此外，$\I\x = \lambda\x = 1\x$对所有向量$\x \in \R^n\backslash\{\0\}$成立。
+    因此，单位矩阵的唯一特征空间$E_1$张成$n$维，
+    并且$\R^n$的所有$n$个标准基向量都是$\I$的特征向量。
+\end{example}
+
+关于特征值和特征向量的有用属性包括：
+\begin{itemize}
+    \item 矩阵$\A$及其转置$\A^\top$具有相同的特征值，但不一定具有相同的特征向量。
+    \item 特征空间$E_\lambda$是$\A − \lambda\I$的零空间，因为
+    \begin{subequations}
+        \begin{align}
+        \A\x = \lambda\x &\Longleftrightarrow \A\x − \lambda\x = \0 \\
+        &\Longleftrightarrow
+        (\A − \lambda\I)\x = 0 \Longleftrightarrow \x \in \ker(\A − \lambda\I).
+        \end{align}
+    \end{subequations}
+    \item 相似矩阵（见定义 2.22）具有相同的特征值。
+          因此，线性映射$\Phi$的特征值与其变换矩阵的基选择无关。
+          这使得特征值以及行列式和迹成为线性映射的关键特征参数，
+          因为它们在基变换下都是不变的。
+    \item 对称正定矩阵总是具有正实特征值(positive real eigenvalues)。
+\end{itemize}
+
+\begin{example}[计算特征值, 特征向量和特征空间]
+    让我们找到下面这个$2 × 2$矩阵的特征值和特征向量
+    \begin{equation}
+        \A =
+        \begin{bmatrix}
+            4 & 2 \\
+            1 & 3
+        \end{bmatrix}
+    \end{equation}
+    \paragraph{步骤 1：特征多项式}
+    根据我们对$\A$的特征向量$\x \neq \0$和特征值$\lambda$的定义，
+    会有一个向量使得$\A\x = \lambda\x$，
+    即$(\A − \lambda\I)\x = \0$。
+    由于$\x \neq \0$，
+    这需要$\A − \lambda\I$的核(零空间)包含的元素多于$\0$(不能只有$\0$这一个)。
+    这意味着$\A − \lambda\I$不可逆，
+    因此$\det(\A − \lambda\I) = 0$。
+    因此，我们需要计算特征多项式 (4.22a) 的根找到特征值。
+    \paragraph{步骤 2:特征值}
+    特征多项式是
+    \begin{subequations}
+        \begin{align}
+            p_{\A}(\lambda) &= \det(\A − \lambda\I) \\
+            &=
+            \det\left(
+            \begin{bmatrix}
+                4 & 2 \\
+                1 & 3
+            \end{bmatrix}
+            -
+            \begin{bmatrix}
+                \lambda & 0 \\
+                0 & \lambda
+            \end{bmatrix}
+            \right)
+            =
+            \begin{array}{|cc|}
+                4 - \lambda & 2 \\
+                1 & 3 - \lambda
+            \end{array} \\
+            &= (4 − \lambda)(3 − \lambda) − 2 \cdot 1 .
+        \end{align}
+    \end{subequations}
+    我们分解特征多项式并得到
+    \begin{equation}
+        p(\lambda) =
+        (4 − \lambda)(3 − \lambda) − 2 · 1 =
+        10 − 7\lambda + \lambda^2 =
+        (2 − \lambda)(5 − \lambda)
+    \end{equation}
+    得到根为$\lambda_1 = 2,\lambda_2 = 5$.
+    \paragraph{步骤 3:特征向量和特征空间}
+    我们通过查看向量$\x$来找到对应于这些特征值的特征向量，使得
+    \begin{equation}
+        \begin{bmatrix}
+            4-\lambda & 2 \\
+            1 & 3-\lambda
+        \end{bmatrix}
+        \x = \0.
+    \end{equation}
+    对于$\lambda = 5$, 我们有
+    \begin{equation}
+        \begin{bmatrix}
+            4 - 5 & 2 \\
+            1 & 3 - 5
+        \end{bmatrix}
+        \begin{bmatrix}
+            x_1 \\ x_2
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            -1 & 2 \\
+            1 & -2
+        \end{bmatrix}
+        \begin{bmatrix}
+            x_1 \\ x_2
+        \end{bmatrix}
+        = \0.
+    \end{equation}
+    我们解齐次方程并得到解空间
+    \begin{equation}
+        E_5 = \spn[
+        \begin{bmatrix}
+            2 \\ 1
+        \end{bmatrix}]
+    \end{equation}
+    这个特征空间是一维的，因为它只有一个基向量。
+    类似地，我们通过求解齐次方程组来找到$\lambda = 2$的特征向量
+    \begin{equation}
+        \begin{bmatrix}
+            4-2 & 2 \\
+            1 & 3-2
+        \end{bmatrix}
+        \x =
+        \begin{bmatrix}
+            2 & 2 \\
+            1 & 1
+        \end{bmatrix}
+        \x = \0.
+    \end{equation}
+    这意味着任何向量
+    $\x = \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}$,
+    其中$x_2 = -x_1$, 例如
+    $\begin{bmatrix} 1 \\ -1 \end{bmatrix}$,
+    是特征值2对应的特征向量.
+    对应的特征空间为
+    \begin{equation}
+        E_2 = \spn[\begin{bmatrix} 1 \\ -1 \end{bmatrix}]
+    \end{equation}
+\end{example}
+
+例 4.5 中的两个特征空间$E_5$和$E_2$是一维的，
+因为它们每个都由一个向量张成。
+然而，在其他情况下，我们可能有多个相同的特征值（见定义 4.9）
+并且特征空间可能有多个维度。
+
+\begin{definition}
+    设$\lambda_i$是方阵$\A$的特征值。
+    那么$\lambda_i$的几何重数(geometric multiplicity)
+    \footnote{注意不是前面的代数重数.}
+    是与$\lambda_i$相关的线性无关特征向量的数量。
+    换句话说，它是与$\lambda_i$关联的特征向量张成的特征空间的维数。
+\end{definition}
+\begin{remark}
+    特定特征值的几何重数必须至少为 1，
+    因为每个特征值至少有一个关联的特征向量。
+    一个特征值的几何重数不会超过其代数重数，但可能会更低。
+    \hfill $\lozenge$
+\end{remark}
+
+\begin{example}
+    矩阵
+    $\A =
+    \begin{bmatrix}
+        2 & 1 \\
+        0 & 2
+    \end{bmatrix}$
+    有两个重复的特征值$\lambda_1 = \lambda_2 = 2$且代数重数为2。
+    然而，特征值只有一个不同的单位特征向量
+    $\x_1 = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$
+    因此几何重数为1。
+\end{example}
+
+{\centering{从二维建立图形直觉}\\}
+让我们使用不同的线性映射对行列式、特征向量和特征值有一些直观的了解。
+图 4.4 描述了五个变换矩阵$\A_1,\dots,\A_5$
+及其对以原点为中心的方形点网格的影响：
+\begin{itemize}
+    \item
+    $\A_1 = \begin{bmatrix} \frac{1}{2} & 0 \\ 0 & 2 \end{bmatrix}$.
+    两个特征向量的方向对应于$\R^2$中的个标准基向量，即对应于两个基轴(cardinal axes)。
+    纵轴扩展了 2 倍（特征值$\lambda_1 = 2$），
+    水平轴压缩了$\frac{1}{2}$倍（特征值$\lambda_2 = \frac{1}{2}$）。
+    映射是面积不变的(area perserving)（$\det(\A_1) = 1 = 2 · \frac{1}{2})$。
+    \item
+    $\A_2 = \begin{bmatrix} 1 & \frac{1}{2} \\ 0 & 1 \end{bmatrix}$.
+    对应于剪切(shearing)映射 ，
+    \footnote{台湾翻译为推移。也可以翻译为错切映射.把这里的剪切当成是剪切力就好理解了}
+    即，如果它们位于纵轴的正半部分，
+    它将沿水平轴向右剪切点，反之亦然。
+    该映射是面积不变的（$\det(\A_2) = 1$）。
+    特征值$\lambda_1 = 1 = \lambda_2$重复且特征向量共线
+    （此处绘制是为了强调两个相反方向）。
+    这表明映射只作用于一个方向(水平轴)
+    \item
+    $ \A_3 =
+    \begin{bmatrix}
+        \cos(\frac{\pi}{6}) & -\sin(\frac{\pi}{6}) \\
+        \sin(\frac{\pi}{6}) & \cos(\frac{\pi}{6})
+    \end{bmatrix}
+    = \frac{1}{2}
+    \begin{bmatrix}
+        \sqrt{3} & -1 \\
+        1 & \sqrt{3}
+    \end{bmatrix}
+    $.
+    矩阵$\A_3$将点逆时针旋转$\frac{\pi}{6} \rad = 30°$，
+    并且只有复(complex)特征值，
+    这意味着映射是旋转（因此，没有绘制特征向量）。
+    旋转必须是体积保持不变的，因此行列式为 1。
+    有关旋转的更多详细信息，请参阅第 3.9 节。
+    \item
+    $\A_4 =
+    \begin{bmatrix}
+        1 & -1 \\
+        -1 & 1
+    \end{bmatrix}$
+    表示将二维域折叠到一维的标准基中的映射。
+    由于一个特征值为 0，
+    对应于$\lambda_1 = 0$的（蓝色）特征向量方向上的空间折叠，
+    而正交（红色）特征向量以因子$\lambda_2 = 2$拉伸空间。
+    因此，图像的面积为 0。
+    \item
+    $\A_5 =
+    \begin{bmatrix}
+        1 & \frac{1}{2} \\
+        \frac{1}{2} & 1
+    \end{bmatrix}$
+    将空间缩放$75\%$的剪切和拉伸映射。
+    因为$|\det(\A_5)| = \frac{3}{4}$
+    它将空间沿$\lambda_2$的（红色）特征向量拉伸 1.5 倍，
+    并沿正交（蓝色）特征向量压缩 0.5 倍。
+\end{itemize}
+
+\begin{example}[生物神经网络的特征谱]
+分析和学习网络数据的方法是机器学习方法的重要组成部分。
+理解网络的关键是网络节点之间的连通性(connectivity)，
+尤其是两个节点是否相互连接。
+在数据科学应用中，研究获取这种连通性数据的矩阵通常很有用。
+我们构建了蠕虫 C.Elegans 的完整神经网络的连接/邻接(connectivity/adjacency)矩阵$\A \in \R^{277×277}$。
+每行/列代表该蠕虫大脑的 277 个神经元之一。
+如果神经元$i$通过突触与神经元$j$对话，则连接矩阵$\A$的值为$a_{ij} = 1$，
+否则为$a_{ij} = 0$。
+连接矩阵不是对称的，这意味着特征值可能不是实值。
+因此，我们将连接矩阵的对称版本计算为$\A_{sym} := \A + \A^\top$。
+这个新矩阵$\A_{sym}$如图 4.5(a) 所示，
+并且当且仅当两个神经元连接（白色像素）时具有非零值$a_{ij}$，
+而与连接方向无关。
+在图 4.5(b) 中，我们显示了$\A_{sym}$的相应特征谱。
+水平轴显示特征值的索引，按降序排序。
+纵轴显示相应的特征值。
+该特征谱的$S$形是许多生物神经网络的典型特征。
+于此相关的潜在机制是一个活跃的神经科学研究领域。
+\end{example}
+
+\begin{theorem}
+    矩阵$\A \in \R^{n×n}$对应$n$个不同的特征值$\lambda_1, \dots, \lambda_n$
+    的特征向量$\x_1, . . . , \x_n$线性无关。
+\end{theorem}
+
+该定理指出，具有$n$个不同特征值的矩阵的特征向量构成$\R^n$的基。
+
+\begin{definition}
+    如果方阵$\A \in \R^{n×n}$拥有少于$n$个线性无关的特征向量，
+    则它是亏损的(defective)
+    \footnote{
+        也可译作不足固有值的,
+        defective的本义是"有缺陷的", 我可能会混用亏损和缺陷两种称呼,但实际是指同一事物.
+    }。
+\end{definition}
+
+一个无亏损矩阵$\A \in \R^{n×n}$不一定需要$n$个不同的特征值，
+但它确实需要特征向量构成$\R^n$的基。
+查看亏损矩阵的特征空间，可以看出特征空间的维数之和小于$n$。
+具体而言，亏损矩阵至少有一个特征值$\lambda_i$，
+其代数重数$m > 1$且几何重数小于$m$。
+
+\begin{remark}
+    亏损矩阵不能有$n$个不同的特征值，
+    因为不同的特征值具有线性无关的特征向量（定理 4.12）。
+\end{remark}
+
+\begin{theorem}
+    给定矩阵$\A \in \R^{m \times n}$, 我们总是可以得到对称半正定矩阵
+    $\S \in \R^{n \times n}$, 只要我们定义
+    \begin{equation}
+        \S := \A^\top\A
+    \end{equation}
+\end{theorem}
+\begin{remark}
+    如果$\rk(\A) = n$, 那么$\S := \A^\top\A$是对称正定的
+    \hfill $\lozenge$
+\end{remark}
+
+理解为什么定理 4.14 成立对我们如何使用对称矩阵很有启发性：
+对称需要$\S = \S^\top$，
+通过插入 (4.36) 我们得到
+$\S = \A^\top \A = \A^\top(\A^\top )^\top = (\A^\top \A)^\top = \S^\top$。
+此外，半正定性（第 3.2.3 节）要求
+$\x^\top \S\x \geqslant 0$
+并插入 (4.36) 我们得到
+$\x^\top \S\x = \x^\top \A^\top \A\x = (\x^\top \A^\top)(\A\x) = (\A\x)^\top (\A\x ) \geqslant 0$，
+因为点积计算平方和（它们本身是非负的）。
+
+\begin{theorem}[谱定理]
+    如果$\A \in \R^{n×n}$是对称的，
+    则$\A$的特征向量组成的对应向量空间$V$存在一个正交基，
+    且每个特征值都是实数。
+\end{theorem}
+
+谱定理的一个直接含义是对称矩阵$\A$的特征分解存在（具有实特征值），
+并且我们可以找到特征向量的ONB，
+使得$\A = \bs{P}\bs{D}\bs{P}^\top$，
+其中$\bs{D}$是对角线矩阵，$\bs{P}$的列包含特征向量。
+
+\begin{example}
+    考虑矩阵
+    \begin{equation}
+        \A =
+        \begin{bmatrix}
+            3 & 2 & 2 \\
+            2 & 3 & 2 \\
+            2 & 2 & 3 \\
+        \end{bmatrix}.
+    \end{equation}
+    $\A$的特征多项式是
+    \begin{equation}
+        p_{\A}(\lambda) = -(\lambda - 1)^2 (\lambda - 7),
+    \end{equation}
+    这样我们就可以得到特征值$\lambda_1 = 1$和$\lambda_2 = 7$，
+    其中$\lambda_1$是一个重复的特征值。
+    按照我们计算特征向量的标准程序，我们获得特征空间
+    \begin{equation}
+        E_1 =
+        \spn[
+            \underbrace{
+            \begin{bmatrix}
+                -1 \\ 1 \\ 0
+            \end{bmatrix}
+            }_{=:\x_1},
+            \underbrace{
+            \begin{bmatrix}
+                -1 \\ 0 \\ 1
+            \end{bmatrix}
+            }_{=:\x_2}
+        ],
+        \quad
+        E_7 =
+        \spn[
+            \underbrace{
+            \begin{bmatrix}
+                1 \\ 1 \\ 1
+            \end{bmatrix}
+            }_{=:\x_3}
+        ].
+    \end{equation}
+    我们看到$\x_3$与$\x_1$和$\x_2$都正交。
+    然而，由于$\x_1^\top \x_2 = 1 \neq 0$，
+    它们不是正交的。
+    谱定理（定理 4.15）指出存在一个正交基，
+    但我们所拥有的基不是正交的。
+    但是，我们可以构造一个。
+
+    为了构建这样的基，
+    我们利用$\x_1,\x_2$是与相同特征值$\lambda$关联的特征向量这一事实。
+    因此，对于任何$\alpha, \beta \in \R$，它有
+    \begin{equation}
+        \A(\alpha\x_1 + \beta\x_2) = \A\x_1 \alpha + \A\x_2 \beta = \lambda(\alpha\x_1 + \beta\x_2) ,
+    \end{equation}
+    即，$\x_1$和$\x_2$的任何线性组合也是与$\lambda$关联的$\A$的特征向量。
+    Gram-Schmidt 算法（第 3.8.3 节）
+    是一种使用此类线性组合从一组基向量迭代构建正交/正交基的方法。
+    因此，即使$\x_1$和$\x_2$不正交，
+    我们也可以应用 Gram-Schmidt 算法并找到与$\lambda_1 = 1$相关的特征向量，
+    它们彼此正交（以及与$\x_3 正交$）。
+    在我们的例子中，我们将得到
+    \begin{equation}
+        \x_1' =
+        \begin{bmatrix}
+            -1 \\ 1 \\ 0
+        \end{bmatrix},
+        \quad
+        \x_2' =
+        \frac{1}{2}
+        \begin{bmatrix}
+            -1 \\ -1 \\ 2
+        \end{bmatrix},
+    \end{equation}
+    它们彼此正交，与$x_3$正交，并且$\A$的特征向量与$\lambda_1 = 1$相关联。
+\end{example}
+
+在我们结束对特征值和特征向量的思考之前，
+将这些矩阵特征与行列式和迹的概念联系在一起是很有用的。
+
+\begin{theorem}
+    $\A \in \R^{n \times n}$的行列式是特征值的积, 即
+    \begin{equation}
+        \det(\A) = \prod_{i=1}^{n}\lambda_i,
+    \end{equation}
+    其中$\lambda_i \in \mb{C}$是(可能重复)$\A$的特征值
+\end{theorem}
+
+\begin{theorem}
+    $\A \in \R^{n \times n}$的迹是特征值的和, 即
+    \begin{equation}
+        \tr{\A} = \sum_{i=1}^{n}\lambda_i,
+    \end{equation}
+    其中$\lambda_i \in \mb{C}$是(可能重复)$\A$的特征值
+\end{theorem}
+
+让我们提供这两个定理的几何上直觉解释。
+考虑一个矩阵$\A \in \R^{2×2}$，
+它拥有两个线性无关的特征向量$\x_1,\x_2$。
+对于这个例子，我们假设$(\x_1,\x_2)$是$\R^2$的ONB，
+因此它们是正交的，并且它们张成的正方形面积为1；
+见图 4.6。
+从 4.1 节中，我们知道行列式计算单位正方形面积在变换$\A$下的变化。
+在这个例子中，我们可以明确地计算面积的变化：
+使用$\A$映射特征向量,我们得到向量
+$\v_1 = \A\x_1 = \lambda_1\x_1$和
+$\v_2 = \A\x_2 = \lambda_2\x_2$，
+即新向量$\v_i$是特征向量$\x_i$的缩放版本，
+缩放因子是相应的特征值$\lambda_i$。
+$\v_1, \v_2$仍然是正交的，它们张成的矩形的面积是$|\lambda_1 \lambda_2|$。
+
+鉴于$\x_1,\x_2$(在我们的示例中)是正交的，
+我们可以直接将单位正方形的周长计算为$2(1 + 1)$。
+使用$\A$映射特征向量会创建一个周长为$2(|\lambda_1 | + |\lambda_2|)$的矩形。
+因此，特征值的绝对值之和告诉我们单位正方形的周长在变换矩阵$\A$下如何变化。
+
+\begin{example}[Google页面排序(PageRank) -– 作为特征向量的网页]
+    pass
+\end{example}
+
+\section{Cholesky 分解}
+
+有很多方法可以分解我们在机器学习中经常遇到的特殊类型的矩阵。
+在正实数中，我们有平方根运算，可以将数字分解为相同的分量，例如$9 = 3 · 3$。
+对于矩阵，我们需要小心计算类平方根(square-root-like)的正数运算(positive quantities)。
+对于对称正定矩阵（参见第 3.2.3 节），
+我们可以从许多平方根等价运算中进行选择。
+Cholesky分解/Cholesky因子分解提供了对对称正定矩阵的平方根等价运算，
+这在实践中很有用。
+
+\begin{theorem}[Cholesky 分解]
+    对称正定矩阵$\A$可以分解为乘积$\A = \bs{L}\bs{L}^\top$，
+    其中$\bs{L}$是具有正对角元素的下三角矩阵：
+    \begin{equation}
+        \begin{bmatrix}
+            a_{11} & \cdots & a_{1n} \\
+            \vdots & \ddots & \vdots \\
+            a_{n1} & \cdots & a_{nn} \\
+        \end{bmatrix} =
+        \begin{bmatrix}
+            l_{11} & \cdots & 0 \\
+            \vdots & \ddots & \vdots \\
+            l_{n1} & \cdots & l_{nn} \\
+        \end{bmatrix}
+        \begin{bmatrix}
+            l_{11} & \cdots & l_{n1} \\
+            \vdots & \ddots & \vdots \\
+            0 & \cdots & l_{nn} \\
+        \end{bmatrix}.
+    \end{equation}
+    $\bs{L}$称为$\A$的Cholesky因子(factor), $\bs{L}$是唯一的.
+\end{theorem}
+
+\begin{example}[Cholesky分解]
+考虑对称正定矩阵$\A \in \R^{3 \times 3}$.
+我们想要找到它的Cholesky分解(factorization)$\A = \bs{L}\bs{L}^\top$,i.e.,
+\begin{equation}
+    \A =
+    \begin{bmatrix}
+        a_{11} & a_{21} & a_{31} \\
+        a_{21} & a_{22} & a_{32} \\
+        a_{31} & a_{23} & a_{33}
+    \end{bmatrix} =
+    \bs{L}\bs{L}^\top =
+    \begin{bmatrix}
+        l_{11} & 0 & 0 \\
+        l_{21} & l_{22} & 0 \\
+        l_{31} & l_{32} & l_{33}
+    \end{bmatrix}
+    \begin{bmatrix}
+        l_{11} & l_{21}  & l_{31} \\
+        0 & l_{22} & l_{32} \\
+        0 & 0 & l_{33}
+    \end{bmatrix}.
+\end{equation}
+将右边相乘得到
+\begin{equation}
+    \A =
+    \begin{bmatrix}
+        l_{11}^2 & l_{21}l_{11} & l_{31}l_{11} \\
+        l_{21}l_{11} & l_{21}^2 + l_{22}^2 & l_{31}l_{21} + l_{32}l_{22} \\
+        l_{31}l_{11} & l_{31}l_{21} + l_{31}l_{22} & l_{31}^2 + l_{32}^2 + l_{32}^2
+    \end{bmatrix}.
+\end{equation}
+比较（4.45）的左侧和（4.46）的右侧
+显示对角元素$l_{ii}$中有一个简单的模式：
+\begin{equation}
+    l_{11} = \sqrt{a_{11}},\quad
+    l_{22} = \sqrt{a_{22}-l_{21}^2},\quad
+    l_{33} = \sqrt{a_{33}-(l_{31}^2+l_{32}^2)}.
+\end{equation}
+同样，对角线下方的元素 ($l_{ij}$，其中$i > j$) 也存在重复模式：
+\begin{equation}
+    l_{21} = \frac{1}{l_{11}} a_{21},\quad
+    l_{31} = \frac{1}{l_{11}} a_{31},\quad
+    l_{32} = \frac{1}{l_{22}}(a_{32} - l_{31}l_{21}),
+\end{equation}
+因此，我们为任何对称正定的$3 × 3$矩阵构造了 Cholesky 分解。
+关键的实现是我们可以向后计算$\bs{L}$的分量$l_{ij}$应该是什么，
+这里给定了$\A$的值$a_{ij}$和先前计算的$l_{ij}$值。
+\end{example}
+
+Cholesky 分解是机器学习数值计算的重要工具。
+这里，对称正定矩阵需要频繁操作，
+例如，多元高斯变量的协方差(covariance)矩阵（参见第 6.5 节）是对称正定矩阵。
+这个协方差矩阵的 Cholesky 分解允许我们从高斯分布生成样本。
+它还允许我们执行随机变量的线性变换，
+这在计算深度随机模型(deep stochastic models)中的梯度(gradients)时被大量使用，
+例如变分(variational)自动编码器(auto-encoder)（Jimenez Rezende 等，2014；Kingma 和 Welling，2014）。
+Cholesky 分解还允许我们非常有效地计算行列式。
+给定 Cholesky 分解$\A = \L\L^\top$，
+我们知道$\det(\A) = \det(\L) \det(\L^\top) = \det(\L)^2$。
+由于$\L$是三角矩阵，行列式只是其对角元素的乘积，因此$\det(\A) = \prod_i l_{ii}^2$。
+因此，许多数值软件包使用 Cholesky 分解来提高计算效率。
+
+\section{特征分解和对角化}
+对角矩阵(diagonal matrix)是在所有非对角元素上都具有零值的矩阵，
+即，它们的形式为
+\begin{equation}
+    \bs{D} =
+    \begin{bmatrix}
+        c_1 & \cdots & 0 \\
+        \vdots & \ddots & \vdots \\
+        0 & \vdots & c_n
+    \end{bmatrix}.
+\end{equation}
+它们允许快速计算行列式、幂和逆。
+行列式是其对角元素的乘积，
+矩阵幂$\D^k$由每个对角元素的$k$次幂给出，
+如果对角元素都非零，则逆$\D^{−1}$是其对角元素的倒数(reciprocal)。
+
+在本节中，我们将讨论如何将矩阵转换为对角线形式。
+这是我们在 2.7.2 节中讨论的基变换和 4.2 节中的特征值的重要应用。
+
+回想一下，如果存在可逆矩阵$\P$，使得$\D = \P^{-1}\A\P$，
+则两个矩阵$\A,\D$是相似的（定义 2.22）。
+更具体地说，我们将查看与$\D$相似的矩阵$\A$,
+其中$\D$是在对角线上包含$\A$的特征值的对角矩阵。
+
+\begin{definition}[可对角化]
+    矩阵$\A \in \R^{n \times n}$是可对角化的(diagonalizable),
+    如果它和一个对角矩阵相似的话,i.e.,
+    如果存在一个可逆矩阵$\P \in \R^{n \times n}$
+    使得$\D  = \P^{-1}\A\P$.
+\end{definition}
+
+在下面，我们将看到对角化矩阵$\A \in \R^{n \times n}$
+是一种表达相同线性映射的方式，不过却是在另一个基中（参见第 2.6.1 节），
+这将成为由$\A$特征向量组成的基.
+
+令$\A \in \R^{n \times n}$,
+令$\lambda_1,\dots,\lambda_n$是一组标量,
+令$\p_1,\dots,\p_n$是$\R^n$中的一组向量。
+我们定义$\P := [\p_1,\dots,\p_n]$
+并令$\D \in \R^{n×n}$是一个对角矩阵，
+对角元素为$\lambda_1,\dots,\lambda_n$。
+然后我们可以证明
+\begin{equation}
+    \A\P = \P\D
+\end{equation}
+当且仅当$\lambda_1,\dots,\lambda_n$是$\A$的特征值,
+且$\p_1,\dots,\p_n$是对应的$\A$的特征向量
+
+我们可以看到这个说法成立是因为
+\begin{align}
+    \A\P &= \A[\bs{p}_1,\dots,\bs{p}_n] = [\A\bs{p}_1,\dots,\A\bs{p}_n], \\
+    \P\bs{D} &= [\bs{p}_1,\dots,\bs{p}_n]
+    \begin{bmatrix}
+        \lambda_1 & & 0 \\
+        & \ddots & \\
+        0 & & \lambda_n
+    \end{bmatrix}=
+    [\lambda_1\bs{p}_1,\dots,\lambda_n\bs{p}_n]
+\end{align}
+因此，（4.50）意味着
+\begin{align}
+   \A\p_1 = \lambda_1\p_1 \\
+   \vdots \notag\\
+   \A\p_n = \lambda_n\p_n
+\end{align}
+因此，$\P$的列必须是$\A$的特征向量。
+
+我们对角化的定义要求$\P \in \R^{n×n}$是可逆的，
+即$\P$具有满秩（定理 4.3）。
+这要求我们有 n 个线性无关的特征向量$\p_1,\dots,\p_n$，
+即$\p_i$形成$\R^n$的基。
+
+\begin{theorem}[特征分解]
+方阵$\A \in \R^{n\times n}$可以被分解为
+\begin{equation}
+    \A =  \P\bs{D}\P^{-1},
+\end{equation}
+其中$\P \in \R^{n×n}$并且$\D$是一个对角矩阵，
+其对角元素是$\A$的特征值，当且仅当$\A$的特征向量构成$\R^n$的基。
+\end{theorem}
+
+定理 4.20 意味着只有无亏损矩阵可以对角化，
+并且$\P$的列是$\A$的 n 个特征向量。
+对于对称矩阵，我们可以获得更强的特征值分解结果。
+
+\begin{theorem}
+    对称矩阵$\S \in \R^{n×n}$总是可以对角化的
+\end{theorem}
+
+定理 4.21 直接来自谱定理 4.15。
+此外，谱定理指出我们可以找到$\R^n$的特征向量的ONB。
+这使$\P$成为正交矩阵，因此$\D = \P^\top\A\P$。
+
+\begin{remark}
+    矩阵的 Jordan 范式提供了一种分解，
+    适用于亏损矩阵 (Lang, 1987)，
+    但超出了本书的范围。
+    \hfill $\lozenge$
+\end{remark}
+
+\begin{center}
+    \textbf{特征分解的几何直觉}
+\end{center}
+
+我们可以将矩阵的特征分解解释如下（另请参见图 4.7）：
+设$\A$是相对于标准基的线性映射的变换矩阵。
+$\P^{-1}$执行从标准基到特征基(eigenbasis)的基变换。
+这将特征向量$\p_i$图 4.7 中的蓝色和橙色箭头）标识到标准基向量$\e_i$上。
+然后，对角线$\D$通过特征值$\lambda_i$沿这些轴缩放向量。
+最后，$\P$将这些缩放的向量转换回标准/规范坐标，产生$\lambda_i\p_i$。
+
+\begin{example}[特征分解]
+让我们计算$\A = \frac{1}{2}
+\begin{bmatrix}
+    5 & -2 \\
+    -2 & 5
+\end{bmatrix}$的特征分解
+\paragraph{步骤 1：计算特征值和特征向量。}
+$\A$的特征多项式是
+\begin{subequations}
+    \begin{align}
+        &\det(\A - \lambda\I) =
+        \det\left(
+            \begin{bmatrix}
+                \frac{5}{2} - \lambda & -1 \\
+                -1 & \frac{5}{2} - \lambda
+            \end{bmatrix}
+        \right) \\
+        &= (\frac{5}{2} - \lambda)^2 - 1 =
+        \lambda^2 - 5\lambda + \frac{21}{4} =
+        (\lambda - \frac{7}{2})(\lambda - \frac{3}{2}).
+    \end{align}
+\end{subequations}
+因此，$\A$的特征值为$\lambda_1 = \frac{7}{2}$
+和$\lambda_2 = \frac{3}{2}$特征多项式的根），
+通过
+\begin{equation}
+    \begin{bmatrix}
+        2 & 1 \\
+        1 & 2
+    \end{bmatrix}\p_1
+    = \frac{7}{2} \p_1,\quad
+    \begin{bmatrix}
+        2 & 1 \\
+        1 & 2
+    \end{bmatrix}\p_2
+    = \frac{3}{2} \p_2
+\end{equation}
+得到归一化(normalized）特征向量.
+于是有,
+\begin{equation}
+    \p_1 = \frac{1}{\sqrt{2}}
+    \begin{bmatrix}
+        1 \\ -1
+    \end{bmatrix},\quad
+    \p_2 = \frac{1}{\sqrt{2}}
+    \begin{bmatrix}
+        1 \\ 1
+    \end{bmatrix}
+\end{equation}
+\paragraph{第 2 步：检查是否存在。}
+特征向量$\p_1、\p_2$形成$\R^2$的基。
+因此，$\A$可以被对角化。
+\paragraph{第 3 步：构造矩阵$\P$以对角化$\A$。}
+我们在$\P$中收集$\A$的特征向量，使得
+\begin{equation}
+    \P = [\p_1,\p_2] = \frac{1}{\sqrt{2}} =
+    \begin{bmatrix}
+        1 & 1 \\
+        -1 & 1
+    \end{bmatrix}.
+\end{equation}
+我们得到
+\begin{equation}
+    \P^{-1}\A\P =
+    \begin{bmatrix}
+        \frac{7}{2} & 0 \\
+        0 & \frac{3}{2}
+    \end{bmatrix} = \D.
+\end{equation}
+等价地，我们得到
+（利用$\P^{−1} = \P^\top$因为本例中的特征向量$\p_1$和$\p_2$形成一个 ONB）
+\begin{equation}
+    \underbrace{
+    \frac{1}{2}
+    \begin{bmatrix}
+        5 & -2 \\
+        -2 & 5
+    \end{bmatrix}
+    }_{\A}
+    =
+    \underbrace{
+    \frac{1}{\sqrt{2}}
+    \begin{bmatrix}
+        1 & 1 \\
+        -1 & 1
+    \end{bmatrix}
+    }_{\P}
+    \underbrace{
+    \begin{bmatrix}
+        \frac{7}{2} & 0 \\
+        0 & \frac{3}{2}
+    \end{bmatrix}
+    }_{\D}
+    \underbrace{
+    \frac{1}{\sqrt{2}}
+    \begin{bmatrix}
+        1 & -1 \\
+        1 & 1
+    \end{bmatrix}
+    }_{\P^{-1}}.
+\end{equation}
+\end{example}
+
+\begin{itemize}
+\item
+对角矩阵$\D$可以有效地幂乘(raised to power)。
+因此，我们可以通过特征值分解（如果存在）找到矩阵$\A \in \R^{n×n}$的矩阵幂，使得
+\begin{equation}
+    \A^k = (\P\bs{D}\P^{-1})^k = \P\bs{D}^k\P^{-1}.
+\end{equation}
+计算$\D$是有效的，因为我们将此操作单独应用于任何对角元素。
+\item
+假设存在特征分解$\A = \P\D\P^{-1}$。 然后，
+\begin{subequations}
+    \begin{align}
+        \det(\A) &= \det(\P\D\P^{-1}) = \det(\P)\det(\D)\det(\P^{-1}) \\
+        &= \det(\D) = \prod_i d_{ii}
+    \end{align}
+\end{subequations}
+允许有效计算$\A$的行列式。
+\end{itemize}
+
+特征值分解需要方阵。
+对一般矩阵进行分解会很有用。
+在下一节中，我们将介绍一种更通用的矩阵分解技术，即奇异值分解。
+
+\section{奇异值分解}
+矩阵的奇异值分解（singular value decomposition,SVD）
+是线性代数中的一种十分重要的矩阵分解方法。
+它被称为“线性代数的基本定理”（Strang，1993），
+因为它可以应用于所有矩阵，而不仅仅是方阵，而且它始终存在。
+此外，正如我们将在下面探讨的那样，
+矩阵$\A$的 SVD（表示线性映射$\Phi:V \rightarrow W$）
+量化了这两个向量空间的基础几何形状之间的变化。
+我们推荐 Kalman (1996) 和 Roy and Banerjee (2014) 的工作，
+以更深入地了解SVD。
+
+\begin{theorem}[SVD定理]
+设$\A \in \R^{m×n}$为秩$r \in [0, \min(m, n)]$的矩形(rectangular)矩阵。
+$\A$的 SVD 是以下形式的分解
+\begin{equation}
+    \A = \bs{U} \bs{\Sigma} \V^\top\\
+\end{equation}
+其中正交矩阵$\U \in \R^{m×m}$具有列向量$\u_i, i = 1,\dots, m$,
+正交矩阵$\V \in \R^{n×n}$具有列向量$\v_j,j = 1,\dots,n$。
+此外，$\bs{\Sigma}$是一个$m × n$矩阵，
+其中$\bs{\Sigma}_{ii} = \sigma_i \geqslant 0$且
+$\bs{\Sigma}_{ij} = 0, i \neq j$。
+\end{theorem}
+
+$\bs{\Sigma}$的对角线项$\sigma_i,i = 1,...,r$称为奇异值(singular values)，
+$\u_i$称为左奇异向量(left-singular vectors)，
+$\v_j$称为右奇异向量(right-singular vectors)。
+按照惯例，奇异值是有序的，即$\sigma_1 \geqslant \sigma_2 \geqslant \sigma_r \geqslant 0$。
+
+奇异值矩阵$\Sigma$是唯一的，但需要注意。
+观察到$\Sigma \in \R^{m×n}$是矩形的。
+特殊的，$\Sigma$的大小与$\A$相同。
+这意味着$\Sigma$有一个包含奇异值的对角子矩阵，需要额外的零填充。
+具体来说，如果$m > n$，则矩阵$\Sigma$具有直到第n行的对角结构，
+然后从$n + 1$到下面的$m$行由$\0^\top$组成，使得
+\begin{equation}
+    \bs{\Sigma} =
+    \begin{bmatrix}
+        \sigma_1 & 0 & 0 \\
+        0 & \ddots & 0 \\
+        0 & 0 & \sigma_n \\
+        0 & \dots & 0 \\
+        \vdots & & \vdots \\
+        0 & \dots & 0
+    \end{bmatrix}
+\end{equation}
+如果$m < n$，
+矩阵$\bs{\Sigma}$具有直到列$m$的对角线结构，
+并且从$m + 1$到$n$的列由$\0$组成：
+\begin{equation}
+    \bs{\Sigma} =
+    \begin{bmatrix}
+        \sigma_1 & 0 & 0 & 0 & \dots & 0 \\
+        0 & \ddots & 0 & \vdots & & \vdots \\
+        0 & 0 & \sigma_m & 0 & \dots & 0
+   \end{bmatrix}
+\end{equation}
+\begin{remark}
+    对于任何矩阵$\A \in \R^{m \times n}$, SVD存在
+    \hfill $\lozenge$
+\end{remark}
+
+\subsection{SVD的几何直觉}
+SVD 提供几何直觉来描述变换矩阵$\A$。
+接下来，我们将把 SVD 作为在基上执行的顺序线性变换进行讨论。
+在例 4.12 中，我们将把 SVD 的变换矩阵应用于$\R^2$中的一组向量，
+这使我们能够更清楚地可视化每个变换的效果。
+
+矩阵的 SVD 可以解释为将相应的线性映射（回想第 2.7.1 节）
+$\Phi : \R^n \rightarrow \R^m$分解为三个操作； 见图 4.8。
+SVD 直觉在表面上与我们的特征分解直觉有相似的结构，参见图 4.7：
+从广义上讲，SVD通过$\V^\top$执行基变换，
+然后通过奇异值矩阵$\bs{\Sigma}$进行维数的缩放和增加（或减少）。
+最后，它通过$\U$执行第二次基变换。
+SVD 包含许多重要的细节和注意事项，这就是为什么我们将更详细地回顾我们的直觉。
+
+假设我们给出了一个线性映射$\Phi : \R^n \rightarrow \R^m$的变换矩阵，
+分别相对于$\R^n$和$\R^m$的标准基$B$和$C$。
+此外，假设$\R^n$的第二个基$\tilde{B}$和$\R_m$的第二个基$\tilde{C}$。
+然后
+\begin{enumerate}
+    \item
+    矩阵$\V$在域$\R^n$上执行从$\tilde{B}$
+    (由图 4.8 左上角的红色和橙色向量$\v_1$和$\v_2$表示)
+    到标准基$B$的基变换。
+    $\V^\top = \V^{-1}$执行从$B$到$\tilde{B}$的基变换。
+    红色和橙色向量现在与图 4.8 左下角的规范基对齐。
+    \item
+    将坐标系更改为$\tilde{B}$后，
+    $\bs{\Sigma}$通过奇异值$\sigma_i$缩放新坐标（并添加或删除维度），
+    即，$\bs{\Sigma}$是$\Phi$相对于$\tilde{B}$和$\tilde{C}$的变换矩阵，
+    由红色和橙色向量表示 拉伸并位于$\e_1-\e_2$平面中，
+    该平面现在嵌入在图 4.8 右下角的第三维中。
+    \item
+    $\U$将陪域(codomain)$\R_m$中的基从$\tilde{C}$更改为$\R_m$的规范基，
+    表示为红色和橙色向量离开$\e_1 - \e_2$平面的旋转。
+    这显示在图 4.8 的右上角。
+\end{enumerate}
+SVD 表示域和陪域中基的变化。
+这与在相同向量空间内的特征分解形成对比，其中应用相同的基变化然后撤消。
+SVD 的特殊之处在于这两个不同的基同时由奇异值矩阵$\bs{\Sigma}$连接。
+
+\begin{example}[向量与SVD]
+考虑向量$\chi \in \R^2$的方形网格映射，
+该网格适合以原点为中心的大小为 2 × 2 的盒子。
+使用标准基，我们使用以下方法映射这些向量
+\begin{subequations}
+    \begin{align}
+        \A &=
+        \begin{bmatrix}
+            1 & -0.8 \\
+            0 & 1 \\
+            1 & 0
+        \end{bmatrix}
+        = \U\bs{\Sigma}\V^\top \\
+        &=
+        \begin{bmatrix}
+            -0.79 & 0 & -0.62 \\
+            0.38 & -0.78 & -0.49 \\
+            -0.48 & -0.62 & 0.62
+        \end{bmatrix}
+        \begin{bmatrix}
+            1.62 & 0 \\
+            0 & 1.0 \\
+            0 & 0
+        \end{bmatrix}
+        \begin{bmatrix}
+            -0.78 & 0.62 \\
+            -0.62 & -0.78
+        \end{bmatrix}.
+    \end{align}
+\end{subequations}
+我们从一组排列在网格中的向量$\chi$（彩色点；参见图 4.9 的左上面板）开始。
+然后我们应用$\V^\top \in \R^{2×2}$，它旋转$\chi$。
+旋转的向量显示在图 4.9 的左下角面板中。
+我们现在使用奇异值矩阵$\bs{\Sigma}$将这些向量映射到余域$\R^3$（参见图 4.9 中的右下图）。
+请注意，所有向量都位于$x_1 - x_2$平面内。
+第三个坐标始终为 0。
+$x_1-x_2$平面中的向量已被奇异值拉伸。
+
+向量$\chi$由$\A$直接映射到余域$\R^3$等于$\chi$通过$\U\bs{\Sigma}\V$的变换，
+其中$\U$在余域$\R^3$内执行旋转，
+因此映射向量不再局限于$x_1 -x_2$平面；
+它们仍然在一个平面上，如图 4.9 的右上角面板所示。
+\end{example}
+
+\subsection{构造SVD}
+我们接下来将讨论SVD存在的原因并展示如何详细计算它。
+一般矩阵的SVD与方阵的特征分解有一些相似之处。
+\begin{remark}
+与SPD矩阵的特征分解比较
+\begin{equation}
+    \S = \S^\top = \P\D\P^\top
+\end{equation}
+对应的SVD
+\begin{equation}
+    \S = \U\bs{\Sigma}\V^\top
+\end{equation}
+如果我们令
+\begin{equation}
+    \U = \P = \V,\quad \D = \bs{\Sigma},
+\end{equation}
+我们看到SPD矩阵的SVD就是他们的特征分解
+\hfill$\lozenge$
+\end{remark}
+
+接下来, 我们探索探索为什么定理4.22成立,以及怎样构造SVD.
+计算$\A \in \R^{m \times n}$的SVD等价于找到
+两个正交基:
+陪域$\R^m$,$U = (\u_1,\dots,\u_m)$,
+域$\R^n$,$V = (\v_1,\dots,\v_m)$
+从这些有序基, 我们将会构造矩阵$\U$和$\V$.
+
+我们的计划是:从构造右奇异向量$\v_1,\dots,\v_n \in \R^n$的正交集合(orthonormal set)开始
+之后我们构造左奇异向量$\u_1,\dots,\u_n \in \R^m$的正交集合.
+此后,我们联系两者,并且要求$v_1$的正交性在$\A$的变换下保持不变.
+这很重要,因为我们知道"像"$\A\v_i$形成了一组正交向量.
+我们会通过标量因子(scalar factors)归一化(normalize)这些像,
+这将会得到奇异值.
+
+让我们从构造右奇异向量开始。
+谱定理（定理 4.15）告诉我们对称矩阵的特征向量形成 ONB，
+这也意味着它可以对角化。
+此外，根据定理 4.14，
+我们总是可以从任何矩形矩阵$\A \in \R^{m×n}$
+构造一个对称的半正定矩阵$\A^\top\A \in \R^{n×n}$。
+因此，我们总是可以对角化$\A^\top\A$并得到
+\begin{equation}
+    \A^\top\A = \P\D\P^\top = \P
+    \begin{bmatrix}
+        \lambda_1 & \cdots & 0 \\
+        \vdots & \ddots & \vdots \\
+        0 & \cdots & \lambda_n
+    \end{bmatrix}\P^\top
+\end{equation}
+其中$\P$是正交矩阵，由正交特征基(orthonormal eigenbasis)组成。
+$\lambda_i > 0$是$\A^\top\A$的特征值。
+让我们假设$\A$的 SVD 存在并将 (4.64) 代入 (4.71)。 这产生
+\begin{equation}
+    \A^\top\A =
+    (\U\bs{\Sigma}\V^\top)^\top
+    (\U\bs{\Sigma}\V^\top)
+    = \V\bs{\Sigma}^\top\U^\top\U\bs{\Sigma}\V^\top
+\end{equation}
+其中$\U,\V$是正交矩阵。
+因此，$\U^\top\U = \I$，我们得到
+\begin{equation}
+    \A^\top\A =
+    \V\bs{\Sigma}^\top\bs{\Sigma}\V^\top =
+    \V
+    \begin{bmatrix}
+        \sigma_1^2 & 0 & 0 \\
+        0 & \ddots & 0 \\
+        0 & 0 & \sigma_n^2
+    \end{bmatrix}
+    \V^\top
+\end{equation}
+现在比较（4.71）和（4.73），我们确定
+\begin{align}
+    \V^\top &= \P^\top \\
+    \sigma_i^2 &= \lambda_i
+\end{align}
+因此，组成$\P$的$\A^\top\A$的特征向量是$\A$的右奇异向量$\V$（见（4.74））。
+$\A^\top\A$的特征值是$\bs{\Sigma}$的平方奇异值（见（4.75））。
+
+为了获得左奇异向量$\U$，我们遵循类似的过程。
+我们首先计算对称矩阵$\A\A^\top \in \R^{m×m}$
+（而不是之前的$\A^\top\A \in \R^{n×n}$）的SVD。
+$\A$的SVD产生
+\begin{subequations}
+    \begin{align}
+     \A\A^\top &=
+    (\U\bs{\Sigma}\V^\top)
+    (\U\bs{\Sigma}\V^\top)^\top
+    = \U\bs{\Sigma}\V^\top\V\bs{\Sigma}^\top\U^\top \\
+    &= \U
+    \begin{bmatrix}
+        \sigma_1^2 & 0 & 0 \\
+        0 & \ddots & 0 \\
+        0 & 0 & \sigma_n^2
+    \end{bmatrix} \U^\top
+    \end{align}
+\end{subequations}
+谱定理告诉我们$\A\A^\top = \S\D\S^\top$可以对角化，
+我们可以找到$\A\A^\top$的特征向量的ONB，
+这些特征向量收集在$\S$中。
+$\A\A^\top$的正交特征向量是左奇异向量$\U$并在SVD的陪域中形成正交基。
+
+这就留下了矩阵$\bs{\Sigma}$的结构问题。
+由于$\A\A^\top$和$\A^\top\A$具有相同的非零特征值,
+因此两种情况下 SVD 中$\bs{\Sigma}$矩阵的非零项必须相同。
+
+最后一步是将我们目前接触到的所有部分连接起来。
+我们在$\V$中有一组正交的右奇异向量。
+为了完成 SVD 的构建，我们将它们与正交向量$\U$连接起来。
+为了达到这个目标，我们使用了一个事实，即$\A$下的$\v_i$的图像也必须是正交的。
+我们可以使用 3.4 节的结果来证明这一点。
+我们要求$\A\v_i$和$\A\v_j$之间的内积必须为 0，因为$i \neq j$。
+对于任意两个正交特征向量$\v_i,\v_j, i \neq j$，下式成立
+\begin{equation}
+    (\A\v_i)^\top(\A\v_j) =
+    \v_i^\top(\A^\top\A)\v_j =
+    \v_i^\top(\lambda_j\v_j) =
+    \lambda_j\v_j^\top\v_j = 0.
+\end{equation}
+对于$m \geqslant r$的情况，
+$\{\A\v_1,\dots,\A\v_r\}$是$\R_m$的$r$-维子空间的基成立。
+
+为了完成 SVD 构建，我们需要正交的左奇异向量：
+我们对右奇异向量$\A\v_i$的像进行归一化并得到
+\begin{equation}
+    \u_i :=
+    \frac{\A\v_i}{\norm{\A\v_i}} =
+    \frac{1}{\sqrt{\lambda_i}}\A\v_i =
+    \frac{1}{\sigma_i}\A\v_i,
+\end{equation}
+其中最后一个等式是从 (4.75) 和 (4.76b) 获得的，
+向我们展示了$\A\A^\top$的特征值使得$\sigma_i^2 = \lambda_i$。
+
+因此，$\A^\top\A$的特征向量，
+我们知道是右奇异向量$\v_i$和它们在$\A$下的归一化像，
+左奇异向量$\u_i$，形成两个自洽(sefl-consistent)的 ONB，
+它们通过奇异值矩阵$\bs{\Sigma}$连接。
+
+让我们重新排列（4.78）以获得奇异值方程
+\begin{equation}
+    \A\v_i = \sigma_i\u_i,\quad i=1,\dots,r.
+\end{equation}
+该方程与特征值方程 (4.25) 非常相似，但左侧和右侧的向量不同。
+
+对于$n < m$， (4.79) 仅对$i \leqslant n$成立，
+但 (4.79) 没有说明$i > n$的$\u_i$。
+然而，我们通过构造知道它们是正交的。
+相反，对于$m < n$，(4.79) 仅适用于$i \leqslant m$。
+对于$i > m$，我们有$\A\v_i = \0$并且我们仍然知道$\v_i$形成一个正交集。
+这意味着 SVD 还提供$\A$的核（零空间）的正交基，即$\A\x = \0$的向量集$\x$参见第 2.7.3 节）。
+
+连接$\v_i$作为$\V$的列,连接$\u_i$作为$\U$的列产生
+\begin{equation}
+    \A\V = \U\bs{\Sigma},
+\end{equation}
+其中$\bs{\Sigma}$与$\A$具有相同的维度，
+并且$1,\dots,r$行的对角线结构相同。
+因此，右乘$\V^\top$产生$\A = \U\bs{\Sigma}\V^\top$，
+这是$\A$的 SVD。
+
+\begin{example}[计算SVD]
+让我们找到下面这个矩阵的奇异值分解
+\begin{equation}
+    \A =
+    \begin{bmatrix}
+        1 & 0 & 1 \\
+        -2 & 1 & 0
+    \end{bmatrix}.
+\end{equation}
+SVD 要求我们计算右奇异向量$\v_j$、奇异值$\sigma_k$和左奇异向量$\u_i$。
+\paragraph{步骤 1:作为$\A^\top\A$特征基的右奇异向量.}
+我们从计算下式开始
+\begin{equation}
+    \A^\top\A =
+    \begin{bmatrix}
+        1 & -2 \\
+        0 & 1 \\
+        1 & 0
+    \end{bmatrix}
+    \begin{bmatrix}
+        1 & 0 & 1 \\
+        -2 & 1 & 0
+    \end{bmatrix} =
+    \begin{bmatrix}
+        5 & -1 & 1 \\
+        -2 & 1 & 0 \\
+        1 & 0 & 1
+    \end{bmatrix}.
+\end{equation}
+我们通过$\A^\top\A$的特征值分解来计算奇异值和右奇异向量$\v_j$，其表示为
+\begin{equation}
+    \A^\top\A =
+    \begin{bmatrix}
+        \frac{5}{\sqrt{30}} & 0 & \frac{-1}{\sqrt{6}} \\
+        \frac{-2}{\sqrt{30}} & \frac{1}{\sqrt{5}} & \frac{-2}{\sqrt{6}} \\
+        \frac{1}{\sqrt{30}} & \frac{2}{\sqrt{5}} & \frac{1}{\sqrt{6}}
+    \end{bmatrix}
+    \begin{bmatrix}
+        6 & 0 & 0 \\
+        0 & 1 & 0 \\
+        0 & 0 & 0 \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        \frac{5}{\sqrt{30}} & \frac{-2}{\sqrt{30}} & \frac{1}{\sqrt{6}} \\
+        0 & \frac{1}{\sqrt{5}} & \frac{2}{\sqrt{5}} \\
+        \frac{-1}{\sqrt{6}} & \frac{-2}{\sqrt{6}} & \frac{1}{\sqrt{6}}
+    \end{bmatrix}
+    = \P\D\P^\top
+\end{equation}
+我们得到右奇异向量作为$\P$的列，使得
+\begin{equation}
+    \V = \P =
+    \begin{bmatrix}
+        \frac{5}{\sqrt{30}} & 0 & \frac{-1}{\sqrt{6}} \\
+        \frac{-2}{\sqrt{30}} & \frac{1}{\sqrt{5}} & \frac{-2}{\sqrt{6}} \\
+        \frac{1}{\sqrt{30}} & \frac{2}{\sqrt{5}} & \frac{1}{\sqrt{6}}
+    \end{bmatrix}.
+\end{equation}
+\paragraph{步骤 2:奇异值矩阵.}
+由于奇异值$\sigma_i$是$\A^\top\A$的特征值的平方根，
+我们直接从$\D$获得它们。
+由于$\rk(\A) = 2$，因此只有两个非零奇异值：
+$\sigma_1 = \sqrt{6}$和$\sigma_2 = 1$。
+奇异值矩阵必须与$\A$的大小相同，我们得到
+\begin{equation}
+    \bs{\Sigma} =
+    \begin{bmatrix}
+        \sqrt{6} & 0 & 0 \\
+        0 & 1 & 0
+    \end{bmatrix}.
+\end{equation}
+\paragraph{步骤 3:左奇异向量作为右奇异向量的归一化像(normalized image)}
+我们通过计算$\A$下的右奇异向量的像
+并通过将它们除以相应的奇异值来归一化它们来找到左奇异向量。
+我们获得
+\begin{align}
+    \u_1 &= \frac{1}{\sigma_1}\A\v_1 =
+    \frac{1}{\sqrt{6}}
+    \begin{bmatrix}
+        1 & 0 & 1 \\
+        -2 & 1 & 0
+    \end{bmatrix}
+    \begin{bmatrix}
+        \frac{5}{\sqrt{30}} \\
+        \frac{-2}{\sqrt{30}} \\
+        \frac{1}{\sqrt{30}}
+    \end{bmatrix} =
+    \begin{bmatrix}
+        \frac{1}{\sqrt{5}} \\
+        -\frac{2}{\sqrt{5}}
+    \end{bmatrix},\\
+    \u_2 &= \frac{1}{\sigma_2}\A\v_2 =
+    \frac{1}{1}
+    \begin{bmatrix}
+        1 & 0 & 1 \\
+        -2 & 1 & 0
+    \end{bmatrix}
+    \begin{bmatrix}
+        0 \\
+        \frac{1}{\sqrt{5}} \\
+        \frac{2}{\sqrt{5}}
+    \end{bmatrix} =
+    \begin{bmatrix}
+        \frac{2}{\sqrt{5}} \\
+        \frac{1}{\sqrt{5}}
+    \end{bmatrix},\\
+    \U &= [\u_1,\u_2] =
+    \frac{1}{\sqrt{5}}
+    \begin{bmatrix}
+        1 & 2 \\
+        -2 & 1
+    \end{bmatrix}.
+\end{align}
+请注意，在计算机上，此处说明的方法具有较差的数值行为，
+并且$\A$的 SVD 通常是在不求助于$\A^\top\A$的特征值分解的情况下计算的。
+\end{example}
+
+\subsection{特征值分解 vs. 奇异值分解}
+让我们考虑特征分解$\A = \P\D\P^{-1}$和
+SVD$\A = \U\bs{\Sigma}\V$并回顾过去部分的核心元素。
+\begin{itemize}
+    \item
+    对于任何矩阵$\R^{m×n}$，SVD 始终存在。
+    特征分解仅针对方阵$\R^{n×n}$定义，
+    并且只有在我们可以找到$\R_n$的特征向量的基时才存在。
+    \item
+    特征分解矩阵$\P$中的向量不一定是正交的，
+    即基变换不是简单的旋转和缩放。
+    另一方面，SVD 中矩阵$\U$和$\V$中的向量是正交的，
+    因此它们确实表示旋转。
+    \item
+    特征分解和 SVD 都是三个线性映射的组合：
+    \begin{enumerate}
+        \item 定义域(domain)中的基变换
+        \item 每个新基向量的独立缩放和从定义与域到陪域的映射
+        \item 陪域中的基变换
+    \end{enumerate}
+    特征分解和 SVD 之间的一个关键区别在于，
+    在 SVD 中，域和陪域可以是不同维度的向量空间。
+    \item
+    在 SVD 中，
+    左右奇异向量矩阵$\U$和$\V$通常不互逆
+    （它们在不同的向量空间中进行基变换）。
+    在特征分解中，基变化矩阵$\P$和$\P^{-1}$互逆。
+    \item
+    在 SVD 中，
+    对角矩阵$\bs{\Sigma}$中的项都是实数和非负的，
+    这对于特征分解中的对角矩阵来说通常是不正确的。
+    \item
+    SVD 和特征分解通过它们的投影密切相关
+    \begin{itemize}
+        \item $\A$的左奇异向量是$\A\A^\top$的特征向量
+        \item $\A$的右奇异向量是$\A^\top\A$的特征向量。
+        \item $\A$的非零奇异值是$\A\A^\top$和$\A^\top \A$的非零特征值的平方根。
+    \end{itemize}
+    \item
+    对于对称矩阵$\A \in \R^{n×n}$，
+    特征值分解和 SVD 是一回事，这由谱定理 4.15 得出。
+\end{itemize}
+
+\begin{example}[在电影评级和消费者中寻找结构]
+    pass
+\end{example}
+
+值得简要讨论 SVD 术语和约定，因为文献中使用了不同的称呼。
+数学上对这些没有区别，但这些差异可能会令人困惑。
+\begin{itemize}
+\item
+为了符号和抽象上的方便，我们使用 SVD 符号，
+其中 SVD 被描述为具有两个方的左右奇异向量矩阵，
+但是一个不方奇异值矩阵。
+我们对 SVD 的定义 (4.64) 有时称为完整 SVD(full SVD)。
+\item
+一些作者对 SVD 的定义略有不同，
+并专注于方奇异矩阵。
+那么，对于$\A \in \R^{m×n}$且$m \geqslant n$，
+\begin{equation}
+    \underset{m \times n}{\A} =
+    \underset{m \times n}{\U}
+    \underset{n \times n}{\bs{\Sigma}}
+    \underset{n \times n}{\V^\top}.
+\end{equation}
+有时，此公式称为简化的SVD（例如，Datta (2010)
+或SVD（例如，Press 等人 (2007)）。
+这种替代格式仅改变矩阵的构造方式，但保持 SVD 的数学结构不变。
+这种替代公式的方便之处在于$\bs{\Sigma}$是对角线，
+就像在特征值分解中一样。
+\item
+在 4.6 节中，我们将学习使用 SVD（也称为截断(truncated) SVD）的矩阵逼近技术。
+\item
+可以定义一个秩为$r$的矩阵$\A$的 SVD，
+使得$\U$是一个$m × r$矩阵，
+$\bs{\Sigma}$是一个对角矩阵$r × r$，
+而$\V$是一个$r × n$矩阵。
+这种构造与我们的定义非常相似，
+并确保对角矩阵$\bs{\Sigma}$沿对角线只有非零项。
+这种替代符号的主要方便之处在于$\bs{\Sigma}$是对角线，就像在特征值分解中一样。
+\item
+$\A$的SVD仅适用于$m > n$的$m × n$矩阵的限制实际上是不必要的。
+当$m < n$时，SVD 分解将产生具有比行更多的零列的$\bs{\Sigma}$，
+因此，奇异值$\sigma_{m+1},\dots, \sigma_n$为 0。
+\end{itemize}
+
+SVD 用于机器学习的各种应用，从曲线拟合中的最小二乘问题到求解线性方程组。
+这些应用程序利用了 SVD 的各种重要特性、
+它与矩阵秩的关系以及它用低秩矩阵逼近给定秩矩阵的能力。
+用其 SVD 替换矩阵通常具有使计算对数值舍入误差更稳健的优势。
+正如我们将在下一节中探讨的那样，
+SVD 以有原则的方式用“更简单”矩阵近似矩阵的能力开辟了机器学习应用程序，
+范围从降维和主题建模到数据压缩和聚类。
+
+\section{矩阵近似}
+我们认为 SVD 是一种将$\A = \U\bs{\Sigma}\V^\top \in \R^{m×n}$
+分解为三个矩阵的乘积的方法，
+其中$\U \in \R^{m×m}$和$\V \in \R^{n×n}$是正交的，
+并且$\bs{\Sigma}$包含其主对角线上的奇异值。
+我们现在将研究SVD如何允许我们将矩阵$\A$
+表示为更简单的（低秩）矩阵$\A_i$的总和，
+而不是进行完整的 SVD 分解，
+这有助于矩阵近似方案的计算成本低于完整的SVD。
+
+我们构造秩$1$矩阵$\A_i \in \R^{m \times n}$,
+\begin{equation}
+    \A_i := \u_i\v_i^\top,
+\end{equation}
+它由$\U$和$\V$的第$i$个正交列向量的外积形成。
+图 4.11 显示了巨石阵(Stonehenge)的图像，
+它可以用矩阵$\A \in \R^{1432×1910}$和一些外积$\A_i$表示，
+如（4.90）中所定义。
+
+秩为$r$的矩阵$\A \in \R^{m \times n}$可以写作秩为1的矩阵$\A_i$的和, 所以
+\begin{equation}
+    \A =
+    \sum_{i=1}^r \sigma_i\u_i\v_i^\top =
+    \sum_{i=1}^r \A_i,
+\end{equation}
+其中外积矩阵$\A_i$由第$i$个奇异值$\sigma_i$加权(weighted)。
+我们可以看到为什么（4.91）成立：
+奇异值矩阵$\bs{\Sigma}$的对角线结构
+仅乘以匹配的左和右奇异向量$\u_i\v_i^\top$
+并通过相应的奇异值$\sigma_i$对它们进行缩放。
+当$i \neq j$时，所有项$\sum_{ij}\u_i\v^\top_j$都消失了，
+因为$\bs{\Sigma}$是一个对角矩阵。
+任何项$i > r$都消失了，因为相应的奇异值为 0。
+
+在（4.90）中，
+我们引入了秩1矩阵$\A_i$。
+我们将$r$个单独的秩-1矩阵相加得到一个秩-r矩阵$\A$；
+见（4.91）。
+如果总和没有遍历所有矩阵$\A_i,i = 1,\dots,r$,
+仅达到中间值$k < r$，我们得到$\A$的秩-$k$近似值
+\begin{equation}
+    \hat{\A}(k) :=
+    \sum_{i=1}^k \sigma_i\u_i\v_i^\top =
+    \sum_{i=1}^k \sigma_i\A_i
+\end{equation}
+这里$\rk(\hat{\A}(k)) = k$.
+图 4.12 显示了巨石阵原始图像$\A$的低秩近似$\hat{\A}(k)$。
+岩石的形状在 5 级近似中变得越来越明显和清晰可辨。
+虽然原始图像需要$1,432 · 1,910 = 2,735,120$个数字，
+但 5 阶近似只需要我们存储五个奇异值和五个左右奇异向量
+（维度分别为1,432 和 1,910)
+总共$5 · (1,432 + 1,910 + 1) = 16,715$个数字 –
+略高于原始数字的 0.6\%。
+
+为了测量$\A$与其秩-$k$近似$\hat{\A}(k)$之间的差异（误差），
+我们需要范数的概念。
+在 3.1 节中，我们已经在向量上使用了范数来测量向量的长度。
+通过类比，我们也可以定义矩阵的范数。
+\begin{definition}[矩阵的谱范数]
+对于$\x \in \R^n\backslash{\0}$,
+矩阵$\A \in \R^{m \times n}$矩阵的谱范数(spectral norm)被定义为
+\begin{equation}
+    \norm{\A}_2 := \underset{\x}{\max} \frac{\norm{\A\x}_2}{\norm{x}_2}
+\end{equation}
+\end{definition}
+我们在矩阵范数（左侧）中引入下标符号，
+类似于向量的欧几里得范数（右侧），其下标为 2 。
+谱范数 (4.93) 决定了任何向量$\x$在乘以$\A$时最多可以变成多长。
+
+\begin{theorem}
+    $\A$的谱范数是其最大奇异值$\sigma_1$。
+\end{theorem}
+
+我们将证明留作练习
+
+\begin{theorem}[Eckart-Young 定理（Eckart 和 Young，1936）].
+考虑矩阵$\A \in \R^{m \times n}$, 其秩为$r$,
+且另$\B \in \R^{m \times n}$为秩为$k$的矩阵.
+对于任意$k \leqslant r$且$\hat{\A}(k) = \sum_{i=1}^k\sigma_i\u_i\v_i^\top$
+下面的式子成立
+\begin{align}
+    \hat{\A}(k) &= \arg \min_{\rk(\B)=k}\norm{\A-\B}_2,\\
+    \norm{\A -\hat{\A}(k)}_2 &= \sigma_{k+1}.
+\end{align}
+\end{theorem}
+
+Eckart-Young 定理明确说明了我们通过使用秩-k近似来近似$\A$引入了多少误差。
+我们可以将使用 SVD 获得的 秩-k 近似解释为满秩矩阵$\A$
+到最高$k$秩矩阵的低维空间的投影。
+在所有可能的投影中，SVD 最小化了$\A$和
+任何秩-k近似值之间的误差（相对于谱范数）。
+
+我们可以追溯一些步骤来理解为什么（4.95）应该成立。
+我们观察到$\A − \hat{\A}(k)$之间的差是一个矩阵，
+其中包含剩余的 1 阶矩阵的总和
+\begin{equation}
+    \A - \hat{\A}(k) =
+    \sum_{i=k+1}^r \sigma_i \u_i \v_i^\top.
+\end{equation}
+由定理 4.24，
+我们立即得到$\sigma_{k+1}$作为差分矩阵的谱范数。
+让我们仔细看看（4.94）。
+如果我们假设还有另一个矩阵$\B$，其$\rk(\B) \leqslant k$，使得
+\begin{equation}
+    \norm{\A - \B}_2 < \norm{\A - \hat{\A}(k)}_2,
+\end{equation}
+则存在至少$(n − k )$-维零空间$Z \subseteq \R^n$，
+使得$x \in Z$意味着$\B\x = \0$。那么它遵循
+\begin{equation}
+    \norm{\A\x}_2 = \norm{(\A - \B) \x}_2,
+\end{equation}
+通过使用包含矩阵范数的 Cauchy-Schwartz 不等式 (3.17) 的一个版本，我们得到
+\begin{equation}
+    \norm{\A\x}_2 \leqslant \norm{(\A - \B)}_2 \norm{\x}_2 < \sigma_{k+1}\norm{\x}_2.
+\end{equation}
+然而，存在一个$(k + 1)$-维的子空间，
+其中$\|\A\x\|_2 \geqslant \sigma_{k+1}\|\x\|_2$
+由$\A$的右奇异向量$\v_j, j \leqslant k + 1$张成。
+将这两个空间的维度相加得到一个数字大于 n，
+因为两个空间中都必须有一个非零向量。
+这与第 2.7.3 节中的秩零定理（定理 2.24）相矛盾。
+
+Eckart-Young 定理意味着我们可以使用 SVD
+以原则性的、最优的（在谱范数意义上）方式
+将秩 r 矩阵$\A$减少为秩 k 矩阵$\hat{\A}$ 。
+我们可以将 rank-k 矩阵对 A 的近似解释为有损压缩的一种形式。
+因此，矩阵的低秩近似出现在许多机器学习应用中，
+例如图像处理、噪声过滤和不适定问题的正则化。
+此外，它在降维和主成分分析中起着关键作用，我们将在第 10 章中看到。
+
+\begin{example}[在电影评级和消费者中寻找结构（续）]
+    pass
+\end{example}
+
+\section{矩阵发育树}
+在第 2 章和第 3 章中，我们介绍了线性代数和解析几何的基础知识。
+在本章中，我们研究了矩阵和线性映射的基本特征。
+图 4.13 描绘了不同类型矩阵之间关系的系统发育树
+（黑色箭头表示“是其子集”）
+以及我们可以对它们执行的覆盖操作（蓝色）。
+我们考虑所有实数矩阵$\A \in \R^{n×m}$。
+对于非方阵（其中$n \neq m$），
+SVD 始终存在，正如我们在本章中看到的那样。
+着眼于方阵$\A \in \R^{n×n}$，
+行列式告诉我们方阵是否具有逆矩阵，即它是否属于正则可逆矩阵类。
+如果正方形 n × n 矩阵具有 n 个线性无关的特征向量，
+则该矩阵是无缺陷的并且存在特征分解（定理 4.12）。
+我们知道重复的特征值可能会导致无法对角化的有缺陷的矩阵。
+
+非奇异矩阵和无亏损矩阵是不一样的。
+例如，旋转矩阵将是可逆的（行列式非零）
+但在实数中不可对角化（特征值不保证是实数）。
+
+我们进一步深入研究无缺陷平方 n × n 矩阵的分支。
+如果条件$\A^\top \A = \A\A^\top$成立，
+则$\A$是正常的。
+此外，如果更严格的条件是$\A^\top\A = \A\A^\top = \I$，
+那么$\A$被称为正交（见定义 3.8）。
+正交矩阵集是规则（可逆）矩阵的子集并且满足$\A^\top = \A^{−1}$。
+
+正态矩阵有一个经常遇到的子集，对称矩阵$\S \in \R^{n×n}$，
+满足$\S = \S^\top$。
+对称矩阵只有实数特征值。
+对称矩阵的一个子集由正定矩阵$\P$组成，
+它满足所有$\x \in \R^n\backslash\{\0\}$的条件$\x^\top\P\x > 0$。
+在这种情况下，存在唯一的 Cholesky 分解（定理 4.18）。
+正定矩阵只有正特征值并且总是可逆的（即具有非零行列式）。
+
+对称矩阵的另一个子集由对角矩阵$\D$组成。
+对角矩阵在乘法和加法下是封闭的，但不一定形成一个群
+（这只是在所有对角项都不为零的情况下，以便矩阵可逆）。
+一个特殊的对角矩阵是单位矩阵$\I$。
+
+\section{深入阅读}
+本章中的大部分内容建立了基础数学并将它们与研究映射的方法联系起来，
+其中许多是机器学习在支持软件解决方案和几乎所有机器学习理论的构建块的层面上的核心，。
+使用行列式、特征谱和特征空间等矩阵特征为矩阵的分类和分析提供了基本的特征和条件。
+这扩展到所有形式的数据表示和涉及数据的映射，
+以及判断此类矩阵上计算操作的数值稳定性（Press et al., 2007）。
+
+行列式是用于逆矩阵和“手动”计算特征值的基本工具。
+然而，除了最小的实例外，几乎所有的情况下，
+高斯消元法的数值计算都优于行列式（Press et al., 2007）。
+尽管如此，行列式仍然是一个强大的理论概念，
+例如，根据行列式的符号获得关于基的方向的直觉。
+特征向量可用于执行基变换以将数据转换为有意义的正交特征向量的坐标。
+类似地，矩阵分解方法，例如 Cholesky 分解，
+在我们计算或模拟随机事件时经常会再次出现（Rubinstein 和 Kroese，2016 年）。
+因此，Cholesky 分解使我们能够计算
+我们想要对随机变量执行连续微分的重新参数化(reparametrization)技巧，
+例如，在变分自动编码器中
+（Jimenez Rezende 等人，2014 年；ingma 和 Welling，2014 年）。
+
+特征分解是我们提取表征线性映射的有意义且可解释的信息的基础。
+因此，特征分解是一类称为谱方法的机器学习算法的基础，该算法执行正定核(positive-definite kernel)的特征分解。
+这些谱分解方法包括统计数据分析的经典方法，例如：
+\begin{itemize}
+    \item
+    主成分分析（PCA（Pearson，1901），另见第 10 章），
+    其中寻找解释数据中大部分可变性的低维子空间。
+    \item
+    Fisher 判别分析(Fisher discriminant analysis)，
+    旨在确定用于数据分类的分离超平面（Mika 等，1999）。
+    \item
+    多维标度 (MDS, multidimensional scaling)
+    （Carroll 和 Chang，1970 年）。
+\end{itemize}
+这些方法的计算效率通常来自于找到对称、半正定矩阵的最佳秩$k$近似值。
+更现代的谱方法的例子有不同的起源，
+但每个例子都需要计算正定核的特征向量和特征值，
+例如 Isomap (Tenenbaum et al., 2000)、
+Laplacian eigenmaps (Belkin and Niyogi, 2003) 、
+Hessian 特征图（Donoho 和 Grimes，2003 年）
+和光谱聚类（Shi 和 Malik，2000 年）。
+正如我们在这里通过 SVD 遇到的那样，
+这些的核心计算通常由低秩矩阵近似技术 (Belabbas and Wolfe, 2009) 支持。
+
+SVD 允许我们发现一些与特征分解相同类型的信息。
+但是，SVD 更普遍适用于非方阵和数据表。
+这些矩阵分解方法在我们想要通过近似执行数据压缩时识别数据中的异质性(heterogeneity)时变得相关，
+例如，不是存储$n×m$值而是存储$(n+m)k$值，
+或者当我们想要执行数据预处理，
+例如，去相关(decorrelate)设计矩阵的预测变量（Ormoneit 等，2001）。
+SVD 对矩阵进行运算，我们可以将其解释为具有两个索引（行和列）的矩形数组。
+类矩阵结构到高维数组的扩展称为张量(tensors)。
+事实证明，
+SVD 是对此类张量进行操作的更一般分解的特例（Kolda 和 Bader，2009）。
+张量的,类似 SVD 的操作和低秩近似是:
+例如 Tucker 分解 (Tucker, 1966)
+或 CP 分解（Carroll 和 Chang，1970）。
+
+出于计算效率的原因，SVD 低秩近似经常用于机器学习。
+这是因为它减少了我们需要对潜在的非常大的数据矩阵执行的非零乘法的内存和操作量
+（Trefethen 和 Bau III，1997）。
+此外，低秩近似用于对可能包含缺失值的矩阵进行操作，
+以及用于有损压缩和降维的目的
+（Moonen 和 De Moor，1995 年；Markovsky，2011 年）。
+
+\section*{练习题}
